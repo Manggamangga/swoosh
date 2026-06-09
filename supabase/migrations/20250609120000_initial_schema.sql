@@ -1,0 +1,1 @@
+-- See applied migration: initial_schema on project segpgjvfwlwfqkverhso

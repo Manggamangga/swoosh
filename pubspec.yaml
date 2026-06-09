@@ -1,0 +1,53 @@
+name: swoosh
+description: Personal finance tracker for accounts, budgets, and planning.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  go_router: ^14.8.1
+  supabase_flutter: ^2.9.0
+  google_fonts: ^6.2.1
+  fl_chart: ^0.70.2
+  local_auth: ^2.3.0
+  csv: ^6.0.0
+  file_picker: ^8.3.7
+  shared_preferences: ^2.5.3
+  intl: ^0.20.2
+  uuid: ^4.5.1
+  crypto: ^3.0.6
+  equatable: ^2.0.7
+  url_launcher: ^6.3.1
+  flutter_native_splash: ^2.4.5
+  flutter_launcher_icons: ^0.14.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_icon.png
+  adaptive_icon_background: "#0F0D1E"
+  adaptive_icon_foreground: assets/images/app_icon.png
+
+flutter_native_splash:
+  color: "#0F0D1E"
+  image: assets/images/app_icon.png
+  android_12:
+    color: "#0F0D1E"
+    image: assets/images/app_icon.png
