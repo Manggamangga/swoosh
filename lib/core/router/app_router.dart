@@ -6,6 +6,7 @@ import 'package:swoosh/features/accounts/screens/add_account_screen.dart';
 import 'package:swoosh/features/accounts/screens/add_transaction_screen.dart';
 import 'package:swoosh/features/accounts/screens/csv_import_screen.dart';
 import 'package:swoosh/features/accounts/screens/transfer_screen.dart';
+import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/features/auth/screens/login_screen.dart';
 import 'package:swoosh/features/auth/screens/unlock_screen.dart';
 import 'package:swoosh/features/budgets/screens/budgets_screen.dart';
@@ -23,6 +24,8 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
+      if (Env.skipAuth) return null;
+
       final session = authState.valueOrNull?.session;
       final isLoggingIn = state.matchedLocation == '/login';
       final isUnlocking = state.matchedLocation == '/unlock';

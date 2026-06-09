@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/services/biometric_service.dart';
@@ -84,4 +85,4 @@ final authStateProvider = StreamProvider<AuthState>(
   (ref) => ref.watch(supabaseProvider).auth.onAuthStateChange,
 );
 
-final isUnlockedProvider = StateProvider<bool>((ref) => false);
+final isUnlockedProvider = StateProvider<bool>((ref) => Env.skipAuth);

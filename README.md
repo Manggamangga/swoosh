@@ -15,6 +15,10 @@ Personal finance tracker for accounts, transactions, budgets, recurring payments
 3. Copy `.env.example` values or use defaults in `lib/core/config/env.dart`
 4. `flutter run`
 
+Auth is skipped by default (`SKIP_AUTH=true`) — the app auto-signs into a dev account so you can try features immediately. Re-enable with:
+
+`flutter run --dart-define=SKIP_AUTH=false`
+
 ## Supabase
 
 Project ref: `segpgjvfwlwfqkverhso` (eu-west-1)
