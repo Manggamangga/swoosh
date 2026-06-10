@@ -23,27 +23,31 @@ Auth is skipped by default (`SKIP_AUTH=true`) — the app auto-signs into a dev 
 
 Project ref: `segpgjvfwlwfqkverhso` (eu-west-1)
 
-Edge Functions require Enable Banking secrets (set in Supabase Dashboard, not in the Flutter app):
+### Monzo (recommended — automatic sync)
 
-- `ENABLE_BANKING_APP_ID` — application ID from Enable Banking portal (JWT `kid`)
-- `ENABLE_BANKING_PRIVATE_KEY` — RSA private key PEM (PKCS#8)
+1. Sign in at [developers.monzo.com](https://developers.monzo.com) and approve access in the Monzo app.
+2. Create a **Confidential** OAuth client with redirect URI:
+   `https://segpgjvfwlwfqkverhso.supabase.co/functions/v1/bank-callback`
+3. Set Supabase Edge Function secrets:
+   - `MONZO_CLIENT_ID`
+   - `MONZO_CLIENT_SECRET`
+4. In the app: Accounts → Connect bank → **Monzo** → approve in Monzo app → sync runs automatically.
 
-### Enable Banking setup (one-time)
+### Other banks (CSV / manual)
 
-1. Sign up at [enablebanking.com](https://enablebanking.com) and create a **production** application.
-2. Upload your certificate and note the application ID.
-3. Activate via **Activate by linking accounts** — whitelist Monzo, Barclays, Amex, etc.
-4. Add the secrets above to Supabase Edge Functions.
-5. In the app, go to Accounts → Connect bank and authorise each institution.
+Barclays, Amex, Wise, and Moneybox: add an account manually, then import CSV from the account detail screen.
+
+### Enable Banking (optional — limited UK coverage)
+
+Kept as fallback if UK banks become available in restricted mode. Requires `ENABLE_BANKING_APP_ID` and `ENABLE_BANKING_PRIVATE_KEY` in Supabase secrets.
 
 ## Features
 
-- Manual accounts and transactions
-- CSV import with dedupe
+- Monzo direct API sync (balances + transactions)
+- Manual accounts and CSV import with dedupe
 - Budgets by category
 - Recurring payment detection
 - Cash-flow forecast and savings goals
-- Enable Banking Open Banking (Monzo, Barclays, Amex — restricted mode)
 
 ## Git commits
 

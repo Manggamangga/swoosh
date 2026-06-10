@@ -33,7 +33,7 @@ class BankConnection extends Equatable {
     return BankConnection(
       id: json['id'] as String,
       userId: json['user_id'] as String,
-      provider: json['provider'] as String? ?? 'enable_banking',
+      provider: json['provider'] as String? ?? 'monzo',
       institutionId: json['institution_id'] as String?,
       institutionName: json['institution_name'] as String?,
       requisitionId: json['requisition_id'] as String?,
