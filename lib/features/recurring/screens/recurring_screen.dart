@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
@@ -47,11 +48,14 @@ class RecurringScreen extends ConsumerWidget {
                 ),
               );
             }
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                for (final payment in payments) ...[
-                  SwooshCard(
+            return ListView.builder(
+              padding: ViewInsets.listPadding(context, includeFab: true),
+              itemCount: payments.length,
+              itemBuilder: (context, index) {
+                final payment = payments[index];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == payments.length - 1 ? 0 : 12),
+                  child: SwooshCard(
                     child: Row(
                       children: [
                         Expanded(
@@ -94,10 +98,8 @@ class RecurringScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                ],
-                const SizedBox(height: 80),
-              ],
+                );
+              },
             );
           },
         ),

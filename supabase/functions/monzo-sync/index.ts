@@ -21,8 +21,29 @@ type MonzoTransaction = {
   currency: string;
   description: string;
   created: string;
+  category?: string;
   merchant?: { name?: string };
   decline_reason?: string;
+};
+
+const MONZO_CATEGORY_TO_NAME: Record<string, string> = {
+  groceries: 'Groceries',
+  eating_out: 'Eating out',
+  shopping: 'Shopping',
+  transport: 'Transport',
+  bills: 'Bills',
+  entertainment: 'Entertainment',
+  holidays: 'Holidays',
+  personal_care: 'Personal care',
+  income: 'Income',
+  general: 'General',
+  expenses: 'General',
+  cash: 'General',
+  transfers: 'Transfer',
+  savings: 'Savings',
+  charity: 'General',
+  family: 'General',
+  finances: 'Bills',
 };
 
 function dedupeHash(accountId: string, date: string, amount: number, description: string) {
@@ -36,12 +57,54 @@ function mapAccountType(accountType?: string) {
   return 'everyday';
 }
 
+function defaultAccountName(accountType?: string) {
+  if (accountType === 'uk_retail_joint') return 'Monzo Joint Account';
+  return 'Monzo Current Account';
+}
+
 function transactionDate(created: string) {
   return created.split('T')[0];
 }
 
 function isDuplicateKeyError(error: { code?: string } | null) {
   return error?.code === '23505';
+}
+
+function normalizeMatcher(value: string) {
+  return value.toLowerCase().trim();
+}
+
+function resolveCategoryId(
+  categoriesByName: Map<string, string>,
+  rules: Array<{ matcher: string; matcher_type: string; category_id: string }>,
+  merchant: string,
+  monzoCategory?: string,
+) {
+  const merchantKey = normalizeMatcher(merchant);
+  for (const rule of rules) {
+    if (rule.matcher_type !== 'merchant' && rule.matcher_type !== 'keyword') continue;
+    const matcher = normalizeMatcher(rule.matcher);
+    if (merchantKey.includes(matcher) || matcher.includes(merchantKey)) {
+      return rule.category_id;
+    }
+  }
+
+  if (monzoCategory) {
+    for (const rule of rules) {
+      if (rule.matcher_type !== 'monzo_category') continue;
+      if (normalizeMatcher(rule.matcher) === normalizeMatcher(monzoCategory)) {
+        return rule.category_id;
+      }
+    }
+
+    const categoryName = MONZO_CATEGORY_TO_NAME[normalizeMatcher(monzoCategory)];
+    if (categoryName) {
+      const id = categoriesByName.get(categoryName.toLowerCase());
+      if (id) return id;
+    }
+  }
+
+  return categoriesByName.get('general') ?? null;
 }
 
 async function ensureAccessToken(
@@ -153,6 +216,20 @@ Deno.serve(async (req) => {
       throw error;
     }
 
+    const { data: categories } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('user_id', user.id);
+    const categoriesByName = new Map<string, string>();
+    for (const category of categories ?? []) {
+      categoriesByName.set((category.name as string).toLowerCase(), category.id as string);
+    }
+
+    const { data: rules } = await supabase
+      .from('category_rules')
+      .select('matcher, matcher_type, category_id')
+      .eq('user_id', user.id);
+
     const accountsData = await monzoFetch<{ accounts: MonzoAccount[] }>('/accounts', accessToken);
     let accountsSynced = 0;
     let transactionsSynced = 0;
@@ -162,18 +239,27 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      const { data: existingAccount } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('external_ref', monzoAccount.id)
+        .maybeSingle();
+
+      const accountPayload = {
+        user_id: user.id,
+        account_type: mapAccountType(monzoAccount.account_type),
+        balance_pence: 0,
+        currency: monzoAccount.currency ?? 'GBP',
+        institution: 'Monzo',
+        source: 'openbanking',
+        external_ref: monzoAccount.id,
+        ...(existingAccount ? {} : { name: defaultAccountName(monzoAccount.account_type) }),
+      };
+
       const { data: account, error: accountError } = await supabase
         .from('accounts')
-        .upsert({
-          user_id: user.id,
-          name: monzoAccount.description || 'Monzo',
-          account_type: mapAccountType(monzoAccount.account_type),
-          balance_pence: 0,
-          currency: monzoAccount.currency ?? 'GBP',
-          institution: 'Monzo',
-          source: 'openbanking',
-          external_ref: monzoAccount.id,
-        }, { onConflict: 'user_id,external_ref' })
+        .upsert(accountPayload, { onConflict: 'user_id,external_ref' })
         .select()
         .single();
 
@@ -224,6 +310,13 @@ Deno.serve(async (req) => {
         const date = transactionDate(tx.created);
         const description = tx.merchant?.name ?? tx.description;
         const hash = dedupeHash(account.id, date, tx.amount, description);
+        const categoryId = resolveCategoryId(
+          categoriesByName,
+          rules ?? [],
+          description,
+          tx.category,
+        );
+        const excludeFromAnalytics = tx.category === 'transfers';
 
         const { error: txError } = await supabase.from('transactions').insert({
           user_id: user.id,
@@ -233,10 +326,11 @@ Deno.serve(async (req) => {
           currency: tx.currency ?? 'GBP',
           description,
           merchant: tx.merchant?.name ?? description,
+          category_id: categoryId,
           source: 'openbanking',
           external_ref: tx.id,
           dedupe_hash: hash,
-          exclude_from_analytics: false,
+          exclude_from_analytics: excludeFromAnalytics,
         });
         if (txError) {
           if (isDuplicateKeyError(txError)) continue;

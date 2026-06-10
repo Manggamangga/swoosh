@@ -1,0 +1,31 @@
+---
+description: Prefer MCP tools for Supabase, Dart, docs, and verification
+alwaysApply: true
+---
+
+# MCP-First Workflow
+
+Use MCP tools for implementation and verification before falling back to shell, memory, or guesswork.
+
+## When to use MCP
+
+| Task | MCP server | Examples |
+|------|------------|----------|
+| Supabase schema, migrations, RLS, data checks | `user-supabase` | `apply_migration`, `execute_sql`, `list_tables`, `list_migrations`, `get_advisors`, `get_logs`, `deploy_edge_function` |
+| Flutter/Dart analysis, formatting, tests | `user-dart` | Prefer over raw `dart`/`flutter` shell when available |
+| Library/framework docs | `user-context7` | API syntax, migrations, SDK changes |
+| GitHub issues, PRs, checks | `user-github` | `gh`-backed operations |
+| UI verification in browser | `cursor-ide-browser` | Snapshots, navigation, screenshots |
+
+## Rules
+
+- Read the MCP tool schema/descriptor before calling a tool.
+- Apply Supabase migrations via `apply_migration` — do not ask Sean to run SQL manually when MCP can do it.
+- Verify schema changes with `list_tables` or `execute_sql` after migrations.
+- Check Edge Function / auth failures with `get_logs` before guessing root cause.
+- Run `get_advisors` after meaningful schema or RLS changes.
+- If an MCP call fails, diagnose and retry or report the blocker — do not silently skip verification.
+
+## Fallback
+
+Use shell only when no MCP tool covers the task (e.g. local `flutter run`, git) or MCP is unavailable.

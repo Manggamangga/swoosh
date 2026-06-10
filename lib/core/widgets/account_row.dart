@@ -19,8 +19,6 @@ class AccountRow extends StatelessWidget {
         return AppColors.everyday;
       case AccountType.savings:
         return AppColors.savings;
-      case AccountType.investment:
-        return AppColors.investment;
     }
   }
 

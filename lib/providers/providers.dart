@@ -6,6 +6,8 @@ import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/services/biometric_service.dart';
+import 'package:swoosh/core/services/categorization_service.dart';
+import 'package:swoosh/core/services/category_matcher_service.dart';
 import 'package:swoosh/core/services/forecast_service.dart';
 import 'package:swoosh/core/services/recurring_detection_service.dart';
 import 'package:swoosh/data/csv_import_service.dart';
@@ -13,6 +15,7 @@ import 'package:swoosh/data/repositories/account_repository.dart';
 import 'package:swoosh/data/repositories/bank_connection_repository.dart';
 import 'package:swoosh/data/repositories/budget_repository.dart';
 import 'package:swoosh/data/repositories/category_repository.dart';
+import 'package:swoosh/data/repositories/category_rule_repository.dart';
 import 'package:swoosh/data/repositories/goal_repository.dart';
 import 'package:swoosh/data/repositories/recurring_repository.dart';
 import 'package:swoosh/data/repositories/transaction_repository.dart';
@@ -49,6 +52,24 @@ final transactionRepositoryProvider =
 final categoryRepositoryProvider = Provider<CategoryRepository>(
   (ref) => CategoryRepository(ref.watch(supabaseProvider)),
 );
+
+final categoryRuleRepositoryProvider = Provider<CategoryRuleRepository>(
+  (ref) => CategoryRuleRepository(ref.watch(supabaseProvider)),
+);
+
+final categoryMatcherServiceProvider = Provider<CategoryMatcherService>(
+  (ref) => CategoryMatcherService(),
+);
+
+final categorizationServiceProvider = FutureProvider<CategorizationService>((ref) async {
+  final txRepo = await ref.watch(transactionRepositoryProvider.future);
+  return CategorizationService(
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+    ruleRepository: ref.watch(categoryRuleRepositoryProvider),
+    transactionRepository: txRepo,
+    matcher: ref.watch(categoryMatcherServiceProvider),
+  );
+});
 
 final budgetRepositoryProvider = Provider<BudgetRepository>(
   (ref) => BudgetRepository(ref.watch(supabaseProvider)),

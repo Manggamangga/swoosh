@@ -134,6 +134,17 @@ Rules:
 - The commit message should summarize ALL changes included, not just the most recent edit
 - **PowerShell environment** — shell commands use `;` as separator, not `&&`
 
+### Version bump on commit
+
+When Sean asks for a commit, bump `version` in [pubspec.yaml](pubspec.yaml) as part of the same change (before committing):
+
+- Format: `MAJOR.MINOR.PATCH+BUILD` (e.g. `1.1.0+2`)
+- Always increment `+BUILD` by 1
+- Bump **MINOR** for new features, milestones, or user-visible capability (default for `feat:`)
+- Bump **PATCH** for fixes, polish, and small changes (`fix:`, `perf:`, `style:`, `refactor:`)
+- Bump **MAJOR** only for breaking changes (schema/API breaks, removed flows users relied on)
+- Include the version bump in the commit — do not commit code without revving when this rule applies
+
 ## Working Directory
 
 - Always ensure you are in the working directory before running any git commands

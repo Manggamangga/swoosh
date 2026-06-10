@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
+import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/category_icon.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
@@ -27,7 +29,7 @@ class BudgetsScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(budgetsProvider),
         child: budgetsAsync.when(
           loading: () => ListView(
-            padding: const EdgeInsets.all(20),
+            padding: ViewInsets.listPadding(context, includeFab: true),
             children: const [SkeletonCard(), SizedBox(height: 16), SkeletonCard()],
           ),
           error: (e, _) => Center(child: Text('Error: $e')),
@@ -43,15 +45,18 @@ class BudgetsScreen extends ConsumerWidget {
                 ),
               );
             }
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                for (final budget in budgets) ...[
-                  _BudgetCard(budget: budget),
-                  const SizedBox(height: 12),
-                ],
-                const SizedBox(height: 80),
-              ],
+            return ListView.builder(
+              padding: ViewInsets.listPadding(context, includeFab: true),
+              itemCount: budgets.length,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.only(bottom: index == budgets.length - 1 ? 0 : 12),
+                child: _BudgetCard(
+                  budget: budgets[index],
+                  onTap: () => context.push(
+                    '/transactions?category=${budgets[index].categoryId}',
+                  ),
+                ),
+              ),
             );
           },
         ),
@@ -135,9 +140,10 @@ class BudgetsScreen extends ConsumerWidget {
 }
 
 class _BudgetCard extends StatelessWidget {
-  const _BudgetCard({required this.budget});
+  const _BudgetCard({required this.budget, this.onTap});
 
   final Budget budget;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +151,7 @@ class _BudgetCard extends StatelessWidget {
     final color = budget.isOverBudget ? AppColors.error : AppColors.primary;
 
     return SwooshCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -17,6 +17,11 @@ final transactionsProvider = FutureProvider<List<Transaction>>((ref) async {
   return repo.fetchRecent();
 });
 
+final allTransactionsProvider = FutureProvider<List<Transaction>>((ref) async {
+  final repo = await ref.watch(transactionRepositoryProvider.future);
+  return repo.fetchAll();
+});
+
 final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   return ref.watch(categoryRepositoryProvider).fetchAll();
 });

@@ -295,9 +295,10 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Connect bank')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          children: [
           const Text(
             'Connect Monzo automatically, or import Barclays, Amex, Wise, and Moneybox via CSV.',
             style: TextStyle(color: AppColors.textSecondary),
@@ -305,7 +306,13 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
           const SizedBox(height: 20),
           connectionsAsync.when(
             data: (connections) {
-              if (connections.isEmpty) return const SizedBox.shrink();
+              final uniqueByProvider = <String, BankConnection>{};
+              for (final connection in connections) {
+                uniqueByProvider.putIfAbsent(connection.provider, () => connection);
+              }
+              final visible = uniqueByProvider.values.toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              if (visible.isEmpty) return const SizedBox.shrink();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -314,7 +321,7 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                   ),
                   const SizedBox(height: 12),
-                  for (final connection in connections) ...[
+                  for (final connection in visible) ...[
                     SwooshCard(
                       child: Row(
                         children: [
@@ -498,6 +505,7 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
         ],
+        ),
       ),
     );
   }

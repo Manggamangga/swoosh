@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum AccountType { everyday, savings, investment }
+enum AccountType { everyday, savings }
 
 enum DataSource { manual, csv, openbanking }
 
@@ -40,7 +40,7 @@ class Account extends Equatable {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       name: json['name'] as String,
-      accountType: AccountType.values.byName(json['account_type'] as String),
+      accountType: _parseAccountType(json['account_type'] as String),
       balancePence: (json['balance_pence'] as num).toInt(),
       currency: json['currency'] as String? ?? 'GBP',
       institution: json['institution'] as String?,
@@ -53,6 +53,11 @@ class Account extends Equatable {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
+  }
+
+  static AccountType _parseAccountType(String value) {
+    if (value == 'investment') return AccountType.savings;
+    return AccountType.values.byName(value);
   }
 
   Map<String, dynamic> toJson() => {

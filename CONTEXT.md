@@ -7,11 +7,11 @@ A personal finance tracker for daily use — accounts, transactions, budgets, re
 ### Accounts & money
 
 **Account**:
-A place where money is held or tracked (e.g. Monzo current, Wise GBP, Moneybox ISA).
+A place where money is held or tracked (e.g. Monzo current, Wise GBP, Moneybox ISA). Its name is user-owned: a readable default is set when the account is created, and sync never changes it.
 _Avoid_: Wallet, pot, bucket
 
 **Account type**:
-How an account is grouped for overview: Everyday, Savings, or Investment.
+How an account is grouped for overview: Everyday or Savings. Everyday is spending money; Savings is set-aside money excluded from the spending view.
 _Avoid_: Category, bucket type
 
 **Balance**:
@@ -27,7 +27,7 @@ A single movement of money into or out of an account (spend, income, or transfer
 _Avoid_: Payment, entry, line item
 
 **Transfer**:
-A pair of linked transactions moving money between the user's own accounts; excluded from income/spend analytics.
+A classification for transactions that move money between the user's own accounts; excluded from income/spend analytics. Swoosh only tracks money — it never initiates movements, and users cannot record transfers by hand.
 _Avoid_: Internal payment, move
 
 **Category**:
@@ -35,13 +35,13 @@ A label classifying a transaction for budgeting and analytics (e.g. Groceries, B
 _Avoid_: Tag, bucket
 
 **Net worth**:
-The sum of all account balances across Everyday, Savings, and Investment types.
+The sum of all account balances across Everyday and Savings types.
 _Avoid_: Total wealth, portfolio value
 
 ### Banking & sync
 
 **Connection**:
-An authorised link between Swoosh and an external financial institution via Enable Banking Open Banking. Requires a whitelisted account in restricted mode and 90-day re-consent.
+An authorised link between Swoosh and an external financial institution via a provider (Monzo direct API, or Enable Banking Open Banking). At most one Connection exists per provider per user; retrying a failed authorisation reuses it rather than creating another.
 _Avoid_: Link, integration, bank link
 
 **Source**:
@@ -53,6 +53,10 @@ A fingerprint preventing the same transaction from being imported twice.
 _Avoid_: Unique key, fingerprint
 
 ### Budgeting & planning
+
+**Category rule**:
+A stored mapping from a merchant or keyword to a Category, either seeded (e.g. bank-provided categories, known merchants) or learned when the user re-categorises a transaction. Applied automatically at import and sync.
+_Avoid_: Auto-tag, classifier
 
 **Budget**:
 A monthly spending limit for a category.

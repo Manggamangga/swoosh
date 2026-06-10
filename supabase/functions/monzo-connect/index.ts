@@ -43,20 +43,49 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: 'redirect_url is required' }, 400);
       }
 
-      const { data: connection, error: insertError } = await supabase
+      const { data: existing } = await supabase
         .from('bank_connections')
-        .insert({
-          user_id: user.id,
-          provider: 'monzo',
-          institution_id: 'monzo',
-          institution_name: 'Monzo',
-          status: 'pending',
-        })
-        .select()
-        .single();
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('provider', 'monzo')
+        .maybeSingle();
 
-      if (insertError || !connection) {
-        return jsonResponse({ error: insertError?.message ?? 'Failed to create connection' }, 500);
+      let connection;
+      if (existing) {
+        const { data, error: updateError } = await supabase
+          .from('bank_connections')
+          .update({
+            institution_id: 'monzo',
+            institution_name: 'Monzo',
+            status: 'pending',
+            access_token: null,
+            refresh_token: null,
+            token_expires_at: null,
+            requisition_id: null,
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (updateError || !data) {
+          return jsonResponse({ error: updateError?.message ?? 'Failed to reset connection' }, 500);
+        }
+        connection = data;
+      } else {
+        const { data, error: insertError } = await supabase
+          .from('bank_connections')
+          .insert({
+            user_id: user.id,
+            provider: 'monzo',
+            institution_id: 'monzo',
+            institution_name: 'Monzo',
+            status: 'pending',
+          })
+          .select()
+          .single();
+        if (insertError || !data) {
+          return jsonResponse({ error: insertError?.message ?? 'Failed to create connection' }, 500);
+        }
+        connection = data;
       }
 
       const url = buildMonzoAuthUrl(config.clientId, redirectUrl, connection.id);

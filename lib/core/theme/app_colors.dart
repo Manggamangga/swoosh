@@ -13,7 +13,7 @@ abstract final class AppColors {
   static const spending = Color(0xFFF472B6);
   static const everyday = Color(0xFF22D3EE);
   static const savings = Color(0xFFF472B6);
-  static const investment = Color(0xFF34D399);
+  static const forecast = Color(0xFF34D399);
   static const border = Color(0xFF2D2640);
   static const error = Color(0xFFF87171);
 }

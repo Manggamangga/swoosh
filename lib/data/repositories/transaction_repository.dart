@@ -1,7 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
-import 'package:swoosh/core/utils/dedupe.dart';
-import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/transaction.dart';
 
 class TransactionRepository {
@@ -9,6 +7,38 @@ class TransactionRepository {
 
   final SupabaseClient _client;
   final LocalCache _cache;
+
+  Future<List<Transaction>> fetchAll({int limit = 500}) async {
+    final data = await _client
+        .from('transactions')
+        .select('*, categories(name, color), accounts(name)')
+        .order('transaction_date', ascending: false)
+        .limit(limit);
+    return (data as List).map((e) => Transaction.fromJson(e)).toList();
+  }
+
+  Future<List<Transaction>> fetchUncategorized({int limit = 1000}) async {
+    final data = await _client
+        .from('transactions')
+        .select('*, categories(name, color), accounts(name)')
+        .isFilter('category_id', null)
+        .order('transaction_date', ascending: false)
+        .limit(limit);
+    return (data as List).map((e) => Transaction.fromJson(e)).toList();
+  }
+
+  Future<Transaction> updateCategory({
+    required String transactionId,
+    required String categoryId,
+  }) async {
+    final data = await _client
+        .from('transactions')
+        .update({'category_id': categoryId})
+        .eq('id', transactionId)
+        .select('*, categories(name, color), accounts(name)')
+        .single();
+    return Transaction.fromJson(data);
+  }
 
   Future<List<Transaction>> fetchRecent({int limit = 50}) async {
     try {
@@ -55,59 +85,6 @@ class TransactionRepository {
         .select('*, categories(name, color), accounts(name)')
         .single();
     return Transaction.fromJson(data);
-  }
-
-  Future<void> createTransfer({
-    required String fromAccountId,
-    required String toAccountId,
-    required int amountPence,
-    required DateTime date,
-    required String description,
-    String? categoryId,
-  }) async {
-    final outHash = buildDedupeHash(
-      accountId: fromAccountId,
-      date: date,
-      amountPence: -amountPence,
-      description: description,
-    );
-    final inHash = buildDedupeHash(
-      accountId: toAccountId,
-      date: date,
-      amountPence: amountPence,
-      description: description,
-    );
-
-    final outTx = await _client
-        .from('transactions')
-        .insert({
-          'account_id': fromAccountId,
-          'transaction_date': date.toIso8601String().split('T').first,
-          'amount_pence': -amountPence,
-          'description': description,
-          'category_id': categoryId,
-          'source': DataSource.manual.name,
-          'dedupe_hash': outHash,
-          'exclude_from_analytics': true,
-        })
-        .select()
-        .single();
-
-    await _client.from('transactions').insert({
-      'account_id': toAccountId,
-      'transaction_date': date.toIso8601String().split('T').first,
-      'amount_pence': amountPence,
-      'description': description,
-      'category_id': categoryId,
-      'source': DataSource.manual.name,
-      'dedupe_hash': inHash,
-      'transfer_pair_id': outTx['id'],
-      'exclude_from_analytics': true,
-    });
-
-    await _client.from('transactions').update({
-      'transfer_pair_id': outTx['id'],
-    }).eq('id', outTx['id']);
   }
 
   Future<int> importCsvRows({

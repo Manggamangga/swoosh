@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/services/forecast_service.dart';
+import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
@@ -35,7 +36,7 @@ class PlanningScreen extends ConsumerWidget {
           ref.invalidate(accountsProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: ViewInsets.listPadding(context, includeFab: true),
           children: [
             Text(
               'Cash-flow forecast',
@@ -61,7 +62,11 @@ class PlanningScreen extends ConsumerWidget {
                       recurring: recurring,
                       expectedIncome: transactions,
                     );
-                    return SwooshCard(child: _ForecastChart(points: points));
+                    return SwooshCard(
+                      child: RepaintBoundary(
+                        child: _ForecastChart(points: points),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -97,17 +102,16 @@ class PlanningScreen extends ConsumerWidget {
                     ),
                   );
                 }
-                return Column(
-                  children: goals
-                      .map((g) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _GoalCard(goal: g),
-                          ))
-                      .toList(),
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: goals.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
                 );
               },
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -219,12 +223,12 @@ class _ForecastChart extends StatelessWidget {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: AppColors.investment,
+              color: AppColors.forecast,
               barWidth: 2.5,
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppColors.investment.withValues(alpha: 0.1),
+                color: AppColors.forecast.withValues(alpha: 0.1),
               ),
             ),
           ],
@@ -264,7 +268,7 @@ class _GoalCard extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 18,
-              color: AppColors.investment,
+              color: AppColors.forecast,
             ),
           ),
           const SizedBox(height: 12),
@@ -274,7 +278,7 @@ class _GoalCard extends StatelessWidget {
               value: goal.progress,
               minHeight: 8,
               backgroundColor: AppColors.surfaceElevated,
-              color: AppColors.investment,
+              color: AppColors.forecast,
             ),
           ),
           if (goal.targetDate != null) ...[

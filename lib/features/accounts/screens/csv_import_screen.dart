@@ -40,11 +40,33 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
       final content = String.fromCharCodes(file.bytes!);
 
       final csvService = ref.read(csvImportServiceProvider);
-      final rows = csvService.parse(
+      var rows = csvService.parse(
         accountId: widget.accountId,
         csvContent: content,
       );
       _rowCount = rows.length;
+
+      var categories = await ref.read(categoriesProvider.future);
+      if (categories.isEmpty) {
+        await ref.read(categoryRepositoryProvider).seedDefaults();
+        categories = await ref.read(categoriesProvider.future);
+      }
+      final ruleRepo = ref.read(categoryRuleRepositoryProvider);
+      await ruleRepo.seedDefaultRules(categories);
+      final rules = await ruleRepo.fetchAll();
+      final matcher = ref.read(categoryMatcherServiceProvider);
+
+      rows = rows.map((row) {
+        final categoryId = matcher.match(
+          merchant: row['merchant'] as String? ?? row['description'] as String,
+          categories: categories,
+          rules: rules,
+        );
+        if (categoryId != null) {
+          return {...row, 'category_id': categoryId};
+        }
+        return row;
+      }).toList();
 
       final txRepo = await ref.read(transactionRepositoryProvider.future);
       final imported = await txRepo.importCsvRows(
@@ -53,6 +75,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
       );
 
       ref.invalidate(transactionsProvider);
+      ref.invalidate(allTransactionsProvider);
       ref.invalidate(accountTransactionsProvider(widget.accountId));
       setState(() => _result = 'Imported $imported of ${rows.length} rows');
     } catch (e) {

@@ -5,7 +5,6 @@ import 'package:swoosh/features/accounts/screens/accounts_screen.dart';
 import 'package:swoosh/features/accounts/screens/add_account_screen.dart';
 import 'package:swoosh/features/accounts/screens/add_transaction_screen.dart';
 import 'package:swoosh/features/accounts/screens/csv_import_screen.dart';
-import 'package:swoosh/features/accounts/screens/transfer_screen.dart';
 import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/features/auth/screens/login_screen.dart';
 import 'package:swoosh/features/auth/screens/unlock_screen.dart';
@@ -15,6 +14,7 @@ import 'package:swoosh/features/openbanking/screens/connect_bank_screen.dart';
 import 'package:swoosh/features/planning/screens/planning_screen.dart';
 import 'package:swoosh/features/recurring/screens/recurring_screen.dart';
 import 'package:swoosh/features/shell/app_shell.dart';
+import 'package:swoosh/features/transactions/screens/transactions_screen.dart';
 import 'package:swoosh/providers/providers.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -74,14 +74,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/accounts/:id/transfer',
-        builder: (_, state) => TransferScreen(
-          fromAccountId: state.pathParameters['id']!,
-        ),
-      ),
-      GoRoute(
         path: '/connect-bank',
         builder: (_, __) => const ConnectBankScreen(),
+      ),
+      GoRoute(
+        path: '/transactions',
+        builder: (_, state) => TransactionsScreen(
+          initialCategoryId: state.uri.queryParameters['category'],
+        ),
       ),
     ],
   );

@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
+import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/account_row.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
+import 'package:swoosh/features/accounts/widgets/add_account_chooser.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/providers/data_providers.dart';
+import 'package:swoosh/providers/providers.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -16,20 +19,27 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountsProvider);
+    final connectionsAsync = ref.watch(bankConnectionsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Accounts'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.link),
-            onPressed: () => context.push('/connect-bank'),
-            tooltip: 'Connect bank',
+          connectionsAsync.maybeWhen(
+            data: (connections) {
+              if (connections.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.settings_ethernet),
+                tooltip: 'Manage connections',
+                onPressed: () => context.push('/connect-bank'),
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/accounts/add'),
+        onPressed: () => showAddAccountChooser(context),
         icon: const Icon(Icons.add),
         label: const Text('Add account'),
       ),
@@ -37,20 +47,25 @@ class AccountsScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(accountsProvider),
         child: accountsAsync.when(
           loading: () => ListView(
-            padding: const EdgeInsets.all(20),
+            padding: ViewInsets.listPadding(context, includeFab: true),
             children: const [SkeletonCard(), SizedBox(height: 16), SkeletonCard()],
           ),
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (accounts) {
             if (accounts.isEmpty) {
-              return EmptyState(
-                icon: Icons.account_balance_outlined,
-                title: 'No accounts yet',
-                subtitle: 'Add your Monzo, Barclays, Wise, or other accounts',
-                action: ElevatedButton(
-                  onPressed: () => context.push('/accounts/add'),
-                  child: const Text('Add account'),
-                ),
+              return ListView(
+                padding: ViewInsets.listPadding(context),
+                children: [
+                  EmptyState(
+                    icon: Icons.account_balance_outlined,
+                    title: 'No accounts yet',
+                    subtitle: 'Add your Monzo, Barclays, Wise, or other accounts',
+                    action: ElevatedButton(
+                      onPressed: () => showAddAccountChooser(context),
+                      child: const Text('Add account'),
+                    ),
+                  ),
+                ],
               );
             }
 
@@ -59,39 +74,50 @@ class AccountsScreen extends ConsumerWidget {
               grouped.putIfAbsent(account.accountType, () => []).add(account);
             }
 
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                for (final type in AccountType.values) ...[
-                  if (grouped[type]?.isNotEmpty ?? false) ...[
-                    _SectionHeader(
-                      title: type.name[0].toUpperCase() + type.name.substring(1),
-                      total: grouped[type]!
-                          .fold<int>(0, (sum, a) => sum + a.balancePence),
-                      color: _colorForType(type),
-                    ),
-                    const SizedBox(height: 8),
-                    SwooshCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
+            final sections = AccountType.values
+                .where((type) => grouped[type]?.isNotEmpty ?? false)
+                .toList();
+
+            return ListView.builder(
+              padding: ViewInsets.listPadding(context, includeFab: true),
+              itemCount: sections.length,
+              itemBuilder: (context, index) {
+                final type = sections[index];
+                final sectionAccounts = grouped[type]!;
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == sections.length - 1 ? 0 : 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionHeader(
+                        title: type.name[0].toUpperCase() + type.name.substring(1),
+                        total: sectionAccounts.fold<int>(
+                          0,
+                          (sum, account) => sum + account.balancePence,
+                        ),
+                        color: _colorForType(type),
                       ),
-                      child: Column(
-                        children: grouped[type]!
-                            .map(
-                              (a) => AccountRow(
-                                account: a,
-                                onTap: () => context.push('/accounts/${a.id}'),
-                              ),
-                            )
-                            .toList(),
+                      const SizedBox(height: 8),
+                      SwooshCard(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: Column(
+                          children: sectionAccounts
+                              .map(
+                                (account) => AccountRow(
+                                  account: account,
+                                  onTap: () => context.push('/accounts/${account.id}'),
+                                ),
+                              )
+                              .toList(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ],
-                const SizedBox(height: 80),
-              ],
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),
@@ -105,8 +131,6 @@ class AccountsScreen extends ConsumerWidget {
         return AppColors.everyday;
       case AccountType.savings:
         return AppColors.savings;
-      case AccountType.investment:
-        return AppColors.investment;
     }
   }
 }

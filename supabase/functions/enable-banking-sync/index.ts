@@ -47,7 +47,7 @@ function dedupeHash(accountId: string, date: string, amount: number, description
 
 function mapAccountType(cashAccountType?: string) {
   if (cashAccountType === 'SVGS') return 'savings';
-  if (cashAccountType === 'TRAS') return 'investment';
+  if (cashAccountType === 'TRAS') return 'savings';
   return 'everyday';
 }
 

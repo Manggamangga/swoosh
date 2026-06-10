@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swoosh/app.dart';
 import 'package:swoosh/core/config/env.dart';
-import 'package:swoosh/core/services/dev_auth_bootstrap.dart';
+import 'package:swoosh/features/auth/widgets/dev_auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +13,11 @@ Future<void> main() async {
     publishableKey: Env.supabaseAnonKey,
   );
 
+  Widget app = const ProviderScope(child: SwooshApp());
+
   if (Env.skipAuth) {
-    await bootstrapDevSession();
+    app = DevAuthGate(child: app);
   }
 
-  runApp(const ProviderScope(child: SwooshApp()));
+  runApp(app);
 }
