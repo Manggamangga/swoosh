@@ -23,10 +23,18 @@ Auth is skipped by default (`SKIP_AUTH=true`) — the app auto-signs into a dev 
 
 Project ref: `segpgjvfwlwfqkverhso` (eu-west-1)
 
-Edge Functions require GoCardless secrets:
+Edge Functions require Enable Banking secrets (set in Supabase Dashboard, not in the Flutter app):
 
-- `GOCARDLESS_SECRET_ID`
-- `GOCARDLESS_SECRET_KEY`
+- `ENABLE_BANKING_APP_ID` — application ID from Enable Banking portal (JWT `kid`)
+- `ENABLE_BANKING_PRIVATE_KEY` — RSA private key PEM (PKCS#8)
+
+### Enable Banking setup (one-time)
+
+1. Sign up at [enablebanking.com](https://enablebanking.com) and create a **production** application.
+2. Upload your certificate and note the application ID.
+3. Activate via **Activate by linking accounts** — whitelist Monzo, Barclays, Amex, etc.
+4. Add the secrets above to Supabase Edge Functions.
+5. In the app, go to Accounts → Connect bank and authorise each institution.
 
 ## Features
 
@@ -35,7 +43,7 @@ Edge Functions require GoCardless secrets:
 - Budgets by category
 - Recurring payment detection
 - Cash-flow forecast and savings goals
-- GoCardless Open Banking (Monzo, Barclays, Amex)
+- Enable Banking Open Banking (Monzo, Barclays, Amex — restricted mode)
 
 ## Git commits
 

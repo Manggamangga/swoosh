@@ -16,6 +16,7 @@ import 'package:swoosh/data/repositories/category_repository.dart';
 import 'package:swoosh/data/repositories/goal_repository.dart';
 import 'package:swoosh/data/repositories/recurring_repository.dart';
 import 'package:swoosh/data/repositories/transaction_repository.dart';
+import 'package:swoosh/models/bank_connection.dart';
 
 final supabaseProvider = Provider<SupabaseClient>(
   (ref) => Supabase.instance.client,
@@ -64,6 +65,11 @@ final goalRepositoryProvider = Provider<GoalRepository>(
 final bankConnectionRepositoryProvider = Provider<BankConnectionRepository>(
   (ref) => BankConnectionRepository(ref.watch(supabaseProvider)),
 );
+
+final bankConnectionsProvider = FutureProvider<List<BankConnection>>((ref) async {
+  final repo = ref.watch(bankConnectionRepositoryProvider);
+  return repo.fetchAll();
+});
 
 final csvImportServiceProvider = Provider<CsvImportService>(
   (ref) => CsvImportService(),

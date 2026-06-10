@@ -23,15 +23,24 @@ class BankConnectionRepository {
     return BankConnection.fromJson(result);
   }
 
+  Future<List<Map<String, dynamic>>> fetchInstitutions({String country = 'GB'}) async {
+    final response = await _client.functions.invoke(
+      'enable-banking-connect',
+      body: {'action': 'aspsps', 'country': country},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['aspsps'] as List? ?? [])
+        .cast<Map<String, dynamic>>();
+  }
+
   Future<Map<String, dynamic>> startConnection({
-    required String institutionId,
     required String institutionName,
     required String redirectUrl,
   }) async {
     final response = await _client.functions.invoke(
-      'gocardless-connect',
+      'enable-banking-connect',
       body: {
-        'institution_id': institutionId,
+        'action': 'start',
         'institution_name': institutionName,
         'redirect_url': redirectUrl,
       },
@@ -39,9 +48,24 @@ class BankConnectionRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> completeConnection({
+    required String code,
+    required String state,
+  }) async {
+    final response = await _client.functions.invoke(
+      'enable-banking-connect',
+      body: {
+        'action': 'complete',
+        'code': code,
+        'state': state,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> syncConnection(String connectionId) async {
     final response = await _client.functions.invoke(
-      'gocardless-sync',
+      'enable-banking-sync',
       body: {'connection_id': connectionId},
     );
     return response.data as Map<String, dynamic>;

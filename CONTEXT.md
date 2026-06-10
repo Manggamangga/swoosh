@@ -41,7 +41,7 @@ _Avoid_: Total wealth, portfolio value
 ### Banking & sync
 
 **Connection**:
-An authorised link between Swoosh and an external financial institution via Open Banking.
+An authorised link between Swoosh and an external financial institution via Enable Banking Open Banking. Requires a whitelisted account in restricted mode and 90-day re-consent.
 _Avoid_: Link, integration, bank link
 
 **Source**:
