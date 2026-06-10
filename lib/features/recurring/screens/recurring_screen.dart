@@ -163,7 +163,7 @@ class RecurringScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<RecurringCadence>(
-              value: cadence,
+              initialValue: cadence,
               decoration: const InputDecoration(labelText: 'Cadence'),
               items: RecurringCadence.values
                   .map(

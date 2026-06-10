@@ -91,7 +91,7 @@ class BudgetsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: categoryId,
+              initialValue: categoryId,
               decoration: const InputDecoration(labelText: 'Category'),
               items: spendCategories
                   .map((c) => DropdownMenuItem(value: c.id, child: Text(c.name)))

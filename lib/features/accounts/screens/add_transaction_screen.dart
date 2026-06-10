@@ -134,7 +134,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             loading: () => const CircularProgressIndicator(),
             error: (e, _) => Text('Error: $e'),
             data: (categories) => DropdownButtonFormField<String?>(
-              value: _categoryId,
+              initialValue: _categoryId,
               decoration: const InputDecoration(labelText: 'Category'),
               items: [
                 const DropdownMenuItem(value: null, child: Text('General')),
