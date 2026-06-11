@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
+import 'package:swoosh/core/widgets/error_state.dart';
+import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/transaction_tile.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/models/account.dart';
@@ -58,6 +61,40 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     ref.invalidate(accountsProvider);
   }
 
+  Future<void> _deleteAccount(Account account) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: Text(
+          'Delete ${account.name} and all its transactions? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final repo = await ref.read(accountRepositoryProvider.future);
+    await repo.delete(widget.accountId);
+    ref.invalidate(accountsProvider);
+    ref.invalidate(transactionsProvider);
+    ref.invalidate(allTransactionsProvider);
+    if (mounted) context.go('/accounts');
+  }
+
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsProvider);
@@ -85,11 +122,33 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             icon: const Icon(Icons.add),
             onPressed: () => context.push('/accounts/${widget.accountId}/add-tx'),
           ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              final account = accountsAsync.valueOrNull
+                  ?.where((item) => item.id == widget.accountId)
+                  .firstOrNull;
+              if (account != null && value == 'delete') {
+                _deleteAccount(account);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'delete',
+                child: Text(
+                  'Delete account',
+                  style: TextStyle(color: AppColors.error),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: accountsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        loading: () => ListView(
+          padding: ViewInsets.listPadding(context),
+          children: const [SkeletonCard()],
+        ),
+        error: (error, _) => ErrorState(message: error.toString()),
         data: (accounts) {
           final account = accounts.firstWhere((a) => a.id == widget.accountId);
           return RefreshIndicator(
@@ -103,15 +162,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 children: [
                   _AccountHeader(account: account),
                   const SizedBox(height: 20),
-                  const Center(child: CircularProgressIndicator()),
+                  const SkeletonCard(),
                 ],
               ),
-              error: (e, _) => ListView(
+              error: (error, _) => ListView(
                 padding: ViewInsets.listPadding(context),
                 children: [
                   _AccountHeader(account: account),
                   const SizedBox(height: 20),
-                  Text('Error: $e'),
+                  ErrorState(message: error.toString()),
                 ],
               ),
               data: (transactions) {
@@ -188,17 +247,23 @@ class _AccountHeader extends StatelessWidget {
           if (account.institution != null)
             Text(
               account.institution!,
-              style: const TextStyle(color: Colors.grey),
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           const SizedBox(height: 12),
-          Text(
-            Money.format(
-              account.balancePence,
-              currency: account.currency,
-            ),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+          Hero(
+            tag: 'account-${account.id}',
+            child: Material(
+              color: Colors.transparent,
+              child: Text(
+                Money.format(
+                  account.balancePence,
+                  currency: account.currency,
                 ),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ),
           ),
         ],
       ),

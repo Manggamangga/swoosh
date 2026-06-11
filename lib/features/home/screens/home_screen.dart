@@ -16,6 +16,10 @@ import 'package:swoosh/core/widgets/transaction_tile.dart';
 import 'package:swoosh/features/accounts/widgets/add_account_chooser.dart';
 import 'package:swoosh/features/home/home_balance_view.dart';
 import 'package:swoosh/features/home/widgets/balance_chart.dart';
+import 'package:swoosh/core/widgets/animated_balance_text.dart';
+import 'package:swoosh/features/home/widgets/price_change_alert_card.dart';
+import 'package:swoosh/features/home/widgets/safe_to_spend_card.dart';
+import 'package:swoosh/core/widgets/swoosh_chip.dart';
 import 'package:swoosh/features/home/widgets/upcoming_bills_card.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/recurring_payment.dart';
@@ -87,6 +91,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.invalidate(chartTransactionsProvider(_period));
       ref.invalidate(upcomingRecurringProvider);
       ref.invalidate(recurringProvider);
+      ref.invalidate(safeToSpendProvider);
+      ref.invalidate(priceChangeAlertsProvider);
+      ref.invalidate(balanceHistoryProvider((_period, _view)));
 
       if (!mounted) return;
 
@@ -130,7 +137,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final accountsAsync = ref.watch(accountsProvider);
     final transactionsAsync = ref.watch(transactionsProvider);
     final chartTransactionsAsync = ref.watch(chartTransactionsProvider(_period));
-    final balanceHistory = ref.watch(balanceHistoryProvider((_period, _view)));
+    final balanceHistoryAsync = ref.watch(balanceHistoryProvider((_period, _view)));
+    final safeToSpendAsync = ref.watch(safeToSpendProvider);
+    final priceAlertsAsync = ref.watch(priceChangeAlertsProvider);
     final summaryAsync = ref.watch(monthlySummaryProvider);
     final upcomingAsync = ref.watch(upcomingRecurringProvider);
     final recurringAsync = ref.watch(recurringProvider);
@@ -153,6 +162,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               floating: true,
               title: const Text('Overview'),
               actions: [
+                IconButton(
+                  onPressed: () => context.push('/settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
                 IconButton(
                   onPressed: _isSyncing ? null : _syncAll,
                   icon: _isSyncing
@@ -181,8 +194,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   context,
                   accounts: accounts,
                   accountsLoading: accounts == null && accountsAsync.isLoading,
-                  balanceHistory: balanceHistory,
+                  balanceHistoryAsync: balanceHistoryAsync,
                   chartLoading: chartLoading,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: safeToSpendAsync.when(
+                  loading: () => const SkeletonCard(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (result) => SafeToSpendCard(result: result),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: priceAlertsAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                  data: (alerts) {
+                    if (alerts.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      children: alerts
+                          .map((alert) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: PriceChangeAlertCard(alert: alert),
+                              ))
+                          .toList(),
+                    );
+                  },
                 ),
               ),
             ),
@@ -276,7 +319,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     BuildContext context, {
     required List<Account>? accounts,
     required bool accountsLoading,
-    required List<BalancePoint> balanceHistory,
+    required AsyncValue<List<BalancePoint>> balanceHistoryAsync,
     required bool chartLoading,
   }) {
     if (accountsLoading && accounts == null) {
@@ -300,8 +343,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             style: const TextStyle(color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
-          Text(
-            Money.format(total),
+          AnimatedBalanceText(
+            formattedAmount: Money.format(total),
             style: Theme.of(context)
                 .textTheme
                 .headlineLarge
@@ -316,12 +359,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          if (chartLoading && balanceHistory.isEmpty)
-            const SkeletonLoader(height: 180)
-          else
-            RepaintBoundary(
-              child: BalanceChart(points: balanceHistory),
+          balanceHistoryAsync.when(
+            loading: () => chartLoading
+                ? const SkeletonLoader(height: 180)
+                : const SkeletonLoader(height: 180),
+            error: (_, __) => const SizedBox(
+              height: 180,
+              child: Center(
+                child: Text(
+                  'Could not load chart',
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
+              ),
             ),
+            data: (balanceHistory) {
+              if (chartLoading && balanceHistory.isEmpty) {
+                return const SkeletonLoader(height: 180);
+              }
+              return RepaintBoundary(
+                child: BalanceChart(points: balanceHistory),
+              );
+            },
+          ),
           const SizedBox(height: 16),
           PeriodPills(
             selected: _period,
@@ -347,7 +406,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: 'No transactions yet',
         subtitle: 'Add an account and import or log transactions',
         action: ElevatedButton(
-          onPressed: () => showAddAccountChooser(context),
+          onPressed: () => showAddAccountChooser(context, ref),
           child: const Text('Add account'),
         ),
       );
@@ -390,7 +449,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       .map(
                         (account) => AccountRow(
                           account: account,
-                          onTap: () => context.go('/accounts/${account.id}'),
+                          heroTag: 'account-${account.id}',
+                          onTap: () => context.push('/accounts/${account.id}'),
                         ),
                       )
                       .toList(),
@@ -423,7 +483,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 .map(
                   (account) => AccountRow(
                     account: account,
-                    onTap: () => context.go('/accounts/${account.id}'),
+                    heroTag: 'account-${account.id}',
+                    onTap: () => context.push('/accounts/${account.id}'),
                   ),
                 )
                 .toList(),
@@ -458,36 +519,13 @@ class _TypeTabs extends StatelessWidget {
           final isSelected = view == selected;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
+            child: SwooshChip(
+              label: _label(view),
+              selected: isSelected,
               onTap: () {
                 HapticFeedback.selectionClick();
                 onChanged(view);
               },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.surfaceElevated
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.border,
-                  ),
-                ),
-                child: Text(
-                  _label(view),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isSelected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
             ),
           );
         }).toList(),

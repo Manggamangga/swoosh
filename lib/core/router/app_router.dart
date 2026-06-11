@@ -14,6 +14,7 @@ import 'package:swoosh/features/openbanking/screens/connect_bank_screen.dart';
 import 'package:swoosh/features/planning/screens/planning_screen.dart';
 import 'package:swoosh/features/recurring/screens/recurring_screen.dart';
 import 'package:swoosh/features/shell/app_shell.dart';
+import 'package:swoosh/features/settings/screens/settings_screen.dart';
 import 'package:swoosh/features/transactions/screens/transactions_screen.dart';
 import 'package:swoosh/providers/providers.dart';
 
@@ -99,7 +100,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/accounts/add',
-        builder: (_, __) => const AddAccountScreen(),
+        builder: (_, state) => AddAccountScreen(
+          continueImport: state.uri.queryParameters['continueImport'] == '1',
+        ),
       ),
       GoRoute(
         path: '/accounts/:id',
@@ -122,6 +125,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/connect-bank',
         builder: (_, __) => const ConnectBankScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (_, __) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/transactions',

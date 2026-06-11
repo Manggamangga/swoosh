@@ -8,7 +8,9 @@ import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/category_icon.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
+import 'package:swoosh/core/widgets/error_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
+import 'package:swoosh/features/spending/widgets/spending_donut_chart.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/features/spending/widgets/budget_sheet.dart';
 import 'package:swoosh/providers/data_providers.dart';
@@ -82,7 +84,11 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
                 ],
               )
             : spendingAsync.hasError && displayData == null
-                ? Center(child: Text('Error: ${spendingAsync.error}'))
+                ? ErrorState(
+                    message: 'Could not load spending',
+                    onRetry: () =>
+                        ref.invalidate(spendingMonthProvider(_selectedMonth)),
+                  )
                 : AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     switchInCurve: Curves.easeOutCubic,
@@ -214,6 +220,13 @@ class _SpendingContent extends StatelessWidget {
                 onChanged: onViewModeChanged,
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SwooshCard(
+          child: SpendingDonutChart(
+            categories: data.categories,
+            totalSpentPence: data.totalSpentPence,
           ),
         ),
         const SizedBox(height: 16),
@@ -395,7 +408,7 @@ class _CategorySpendingRow extends StatelessWidget {
           Row(
             children: [
               CategoryIcon(
-                iconName: 'category',
+                iconName: row.categoryIcon,
                 color: row.categoryColor,
                 size: 36,
               ),

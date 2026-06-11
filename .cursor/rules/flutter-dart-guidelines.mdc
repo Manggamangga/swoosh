@@ -99,7 +99,7 @@ You are a **senior Flutter developer** with expertise in:
 ## Supabase Guidelines
 
 - All tables user-scoped via RLS (`auth.uid()`)
-- Edge Functions for secrets (GoCardless OAuth)
+- Edge Functions for secrets (Monzo OAuth, Enable Banking)
 - Never embed service-role keys in the Flutter app
 - Use `dedupe_hash` for transaction imports
 
@@ -109,7 +109,7 @@ You are a **senior Flutter developer** with expertise in:
 - Input validation on client and server
 - Environment variables for Supabase URL/publishable key only in app
 - Use `publishableKey` (not deprecated `anonKey`) when initializing supabase_flutter
-- GoCardless secrets only in Edge Functions
+- Monzo and Enable Banking secrets only in Edge Functions
 
 ## Git Usage
 

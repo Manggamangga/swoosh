@@ -1,6 +1,5 @@
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/recurring_payment.dart';
-import 'package:swoosh/models/transaction.dart';
 
 class ForecastPoint {
   const ForecastPoint({required this.date, required this.balancePence});
@@ -13,7 +12,6 @@ class ForecastService {
   List<ForecastPoint> forecast({
     required List<Account> accounts,
     required List<RecurringPayment> recurring,
-    required List<Transaction> expectedIncome,
     int daysAhead = 90,
   }) {
     final startBalance = accounts.fold<int>(0, (sum, a) => sum + a.balancePence);
@@ -25,24 +23,10 @@ class ForecastService {
       var date = payment.nextDate;
       while (date.isBefore(end) || date.isAtSameMomentAs(end)) {
         if (!date.isBefore(start)) {
-          events[DateTime(date.year, date.month, date.day)] =
-              (events[DateTime(date.year, date.month, date.day)] ?? 0) +
-                  payment.amountPence;
+          final day = DateTime(date.year, date.month, date.day);
+          events[day] = (events[day] ?? 0) + payment.amountPence;
         }
         date = _advance(payment.cadence, date);
-      }
-    }
-
-    for (final tx in expectedIncome) {
-      if (!tx.excludeFromAnalytics && tx.amountPence > 0) {
-        final d = DateTime(
-          tx.transactionDate.year,
-          tx.transactionDate.month,
-          tx.transactionDate.day,
-        );
-        if (!d.isBefore(start) && !d.isAfter(end)) {
-          events[d] = (events[d] ?? 0) + tx.amountPence;
-        }
       }
     }
 

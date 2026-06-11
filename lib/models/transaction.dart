@@ -46,7 +46,7 @@ class Transaction extends Equatable {
 
   bool get isIncome => amountPence > 0;
   bool get isExpense => amountPence < 0;
-  bool get isTransfer => excludeFromAnalytics && transferPairId != null;
+  bool get isExcluded => excludeFromAnalytics;
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(

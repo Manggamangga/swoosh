@@ -70,6 +70,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
 
       ref.invalidate(transactionsProvider);
+      ref.invalidate(allTransactionsProvider);
+      ref.invalidate(accountsProvider);
       ref.invalidate(accountTransactionsProvider(widget.accountId));
       if (mounted) context.pop();
     } catch (e) {

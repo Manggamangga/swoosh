@@ -76,6 +76,7 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
 
       ref.invalidate(transactionsProvider);
       ref.invalidate(allTransactionsProvider);
+      ref.invalidate(accountsProvider);
       ref.invalidate(accountTransactionsProvider(widget.accountId));
       setState(() => _result = 'Imported $imported of ${rows.length} rows');
     } catch (e) {

@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
+import 'package:swoosh/core/services/price_change_service.dart';
+import 'package:swoosh/core/services/safe_to_spend_service.dart';
 import 'package:swoosh/core/utils/analytics.dart';
 import 'package:swoosh/core/widgets/period_pills.dart';
 import 'package:swoosh/features/home/home_balance_view.dart';
@@ -89,29 +91,65 @@ final chartTransactionsProvider =
 typedef BalanceHistoryKey = (ChartPeriod period, HomeBalanceView view);
 
 final balanceHistoryProvider =
-    Provider.family<List<BalancePoint>, BalanceHistoryKey>((ref, key) {
+    FutureProvider.family<List<BalancePoint>, BalanceHistoryKey>((ref, key) async {
   final (period, view) = key;
-  final accounts = ref.watch(accountsProvider).valueOrNull ?? const [];
+  final accounts = await ref.watch(accountsProvider.future);
   final chartTransactions =
-      ref.watch(chartTransactionsProvider(period)).valueOrNull ?? const [];
+      await ref.watch(chartTransactionsProvider(period).future);
   final balanceService = ref.watch(balanceHistoryServiceProvider);
+  final snapshotRepo = ref.watch(balanceSnapshotRepositoryProvider);
 
   final filtered = accountsForView(accounts, view);
   if (filtered.isEmpty) return const [];
 
   final now = DateTime.now();
   final start = period.startFrom(now);
-  final accountIds = filtered.map((account) => account.id).toSet();
+  final accountIds = filtered.map((account) => account.id).toList();
   final periodTransactions = chartTransactions
       .where((transaction) => accountIds.contains(transaction.accountId))
       .toList();
+
+  final syncedIds = filtered
+      .where((account) => account.source == DataSource.openbanking)
+      .map((account) => account.id)
+      .toList();
+
+  final snapshots = syncedIds.isEmpty
+      ? const <BalancePoint>[]
+      : await snapshotRepo.fetchForAccounts(syncedIds, start, now);
 
   return balanceService.buildHistory(
     accounts: filtered,
     transactions: periodTransactions,
     start: start,
     end: now,
+    snapshots: snapshots,
   );
+});
+
+final safeToSpendProvider = FutureProvider<SafeToSpendResult>((ref) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  final recurring = await ref.watch(recurringProvider.future);
+  final budgets = await ref.watch(budgetsProvider.future);
+  return ref.watch(safeToSpendServiceProvider).calculate(
+        accounts: accounts,
+        recurring: recurring,
+        budgets: budgets,
+      );
+});
+
+final priceChangeAlertsProvider = FutureProvider<List<PriceChangeAlert>>((ref) async {
+  final recurring = await ref.watch(recurringProvider.future);
+  final transactions = await ref.watch(allTransactionsProvider.future);
+  return ref.watch(priceChangeServiceProvider).detect(
+        recurring: recurring,
+        transactions: transactions,
+      );
+});
+
+final expectedIncomeProvider = FutureProvider<List<RecurringPayment>>((ref) async {
+  final recurring = await ref.watch(recurringProvider.future);
+  return recurring.where((payment) => payment.amountPence > 0).toList();
 });
 
 final spendingMonthProvider =
@@ -142,6 +180,8 @@ final spendingMonthProvider =
   final budgetByCategory = {
     for (final budget in budgetsWithSpent) budget.categoryId: budget,
   };
+  final categories = await ref.watch(categoriesProvider.future);
+  final iconByCategory = {for (final c in categories) c.id: c.icon};
 
   final currentByCategory = _groupSpendingByCategory(currentTransactions);
   final previousByCategory = _groupSpendingByCategory(previousTransactions);
@@ -158,6 +198,9 @@ final spendingMonthProvider =
       categoryId: categoryId,
       categoryName: current?.name ?? budget?.categoryName ?? 'Uncategorized',
       categoryColor: current?.color ?? budget?.categoryColor ?? '#64748B',
+      categoryIcon: categoryId == '_uncategorized'
+          ? 'category'
+          : iconByCategory[categoryId] ?? 'category',
       spentPence: current?.spentPence ?? 0,
       previousSpentPence: previousByCategory[categoryId]?.spentPence ?? 0,
       budget: budget,
@@ -200,6 +243,7 @@ Map<String, _CategorySpend> _groupSpendingByCategory(
     grouped[categoryId] = _CategorySpend(
       name: tx.categoryName ?? existing?.name ?? 'Uncategorized',
       color: tx.categoryColor ?? existing?.color ?? '#64748B',
+      icon: existing?.icon ?? 'category',
       spentPence: (existing?.spentPence ?? 0) + tx.amountPence.abs(),
     );
   }
@@ -210,11 +254,13 @@ class _CategorySpend {
   const _CategorySpend({
     required this.name,
     required this.color,
+    required this.icon,
     required this.spentPence,
   });
 
   final String name;
   final String color;
+  final String icon;
   final int spentPence;
 }
 
@@ -235,6 +281,7 @@ class CategorySpendingRow {
     required this.categoryId,
     required this.categoryName,
     required this.categoryColor,
+    required this.categoryIcon,
     required this.spentPence,
     required this.previousSpentPence,
     this.budget,
@@ -243,6 +290,7 @@ class CategorySpendingRow {
   final String categoryId;
   final String categoryName;
   final String categoryColor;
+  final String categoryIcon;
   final int spentPence;
   final int previousSpentPence;
   final Budget? budget;

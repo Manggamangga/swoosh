@@ -5,9 +5,14 @@ import 'package:swoosh/core/widgets/category_icon.dart';
 import 'package:swoosh/models/transaction.dart';
 
 class TransactionTile extends StatelessWidget {
-  const TransactionTile({super.key, required this.transaction});
+  const TransactionTile({
+    super.key,
+    required this.transaction,
+    this.showExcludedBadge = false,
+  });
 
   final Transaction transaction;
+  final bool showExcludedBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,7 @@ class TransactionTile extends StatelessWidget {
         children: [
           CategoryIcon(
             iconName: 'category',
-            color: transaction.categoryColor ?? '#a855f7',
+            color: transaction.categoryColor ?? '#A855F7',
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -41,6 +46,14 @@ class TransactionTile extends StatelessWidget {
                     fontSize: 13,
                   ),
                 ),
+                if (showExcludedBadge && transaction.excludeFromAnalytics)
+                  const Text(
+                    'Excluded from analytics',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                    ),
+                  ),
               ],
             ),
           ),

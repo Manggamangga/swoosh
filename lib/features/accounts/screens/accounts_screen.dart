@@ -42,7 +42,7 @@ class AccountsScreen extends ConsumerWidget {
       floatingActionButtonLocation:
           FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showAddAccountChooser(context),
+        onPressed: () => showAddAccountChooser(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('Add account'),
       ),
@@ -64,7 +64,7 @@ class AccountsScreen extends ConsumerWidget {
                     title: 'No accounts yet',
                     subtitle: 'Add your Monzo, Barclays, Wise, or other accounts',
                     action: ElevatedButton(
-                      onPressed: () => showAddAccountChooser(context),
+                      onPressed: () => showAddAccountChooser(context, ref),
                       child: const Text('Add account'),
                     ),
                   ),

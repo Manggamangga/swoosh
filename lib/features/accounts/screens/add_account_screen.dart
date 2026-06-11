@@ -7,7 +7,9 @@ import 'package:swoosh/providers/data_providers.dart';
 import 'package:swoosh/providers/providers.dart';
 
 class AddAccountScreen extends ConsumerStatefulWidget {
-  const AddAccountScreen({super.key});
+  const AddAccountScreen({super.key, this.continueImport = false});
+
+  final bool continueImport;
 
   @override
   ConsumerState<AddAccountScreen> createState() => _AddAccountScreenState();
@@ -35,7 +37,8 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
     try {
       final repo = await ref.read(accountRepositoryProvider.future);
       final balancePence = Money.parseToPence(_balanceController.text);
-      await repo.create(
+      final source = widget.continueImport ? DataSource.csv : DataSource.manual;
+      final account = await repo.create(
         Account(
           id: '',
           userId: '',
@@ -46,7 +49,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
           institution: _institutionController.text.trim().isEmpty
               ? null
               : _institutionController.text.trim(),
-          source: DataSource.manual,
+          source: source,
           balanceAnchorPence: balancePence,
           balanceAnchorDate: DateTime.now(),
           createdAt: DateTime.now(),
@@ -54,7 +57,12 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
         ),
       );
       ref.invalidate(accountsProvider);
-      if (mounted) context.pop();
+      if (!mounted) return;
+      if (widget.continueImport) {
+        context.go('/accounts/${account.id}/import');
+      } else {
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,7 +77,9 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add account')),
+      appBar: AppBar(
+        title: Text(widget.continueImport ? 'New account for CSV' : 'Add account'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -81,7 +91,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
           TextField(
             controller: _institutionController,
             decoration: const InputDecoration(
-              labelText: 'Institution (e.g. Monzo, Wise)',
+              labelText: 'Institution (e.g. Barclays, Wise)',
             ),
           ),
           const SizedBox(height: 16),
@@ -113,7 +123,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save account'),
+                : Text(widget.continueImport ? 'Create & import CSV' : 'Save account'),
           ),
         ],
       ),

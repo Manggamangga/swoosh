@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
+import 'package:swoosh/features/accounts/widgets/csv_account_picker.dart';
 
-Future<void> showAddAccountChooser(BuildContext context) {
+Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -98,7 +100,7 @@ Future<void> showAddAccountChooser(BuildContext context) {
             SwooshCard(
               onTap: () {
                 Navigator.pop(context);
-                context.push('/accounts/add?csv=1');
+                showCsvAccountPicker(context, ref);
               },
               child: const Row(
                 children: [
@@ -114,7 +116,7 @@ Future<void> showAddAccountChooser(BuildContext context) {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Create account first, then import from account screen',
+                          'Pick an account and import a statement',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,

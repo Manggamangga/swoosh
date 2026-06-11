@@ -35,7 +35,6 @@ void main() {
     final points = service.forecast(
       accounts: accounts,
       recurring: recurring,
-      expectedIncome: const [],
       daysAhead: 30,
     );
 

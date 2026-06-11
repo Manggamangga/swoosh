@@ -8,6 +8,8 @@ import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/theme/fab_location.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
+import 'package:swoosh/core/widgets/error_state.dart';
+import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/models/goal.dart';
 import 'package:swoosh/providers/data_providers.dart';
@@ -21,7 +23,6 @@ class PlanningScreen extends ConsumerWidget {
     final accountsAsync = ref.watch(accountsProvider);
     final recurringAsync = ref.watch(recurringProvider);
     final goalsAsync = ref.watch(goalsProvider);
-    final transactionsAsync = ref.watch(transactionsProvider);
     final forecastService = ref.watch(forecastServiceProvider);
 
     return Scaffold(
@@ -29,7 +30,7 @@ class PlanningScreen extends ConsumerWidget {
       floatingActionButtonLocation:
           FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddGoal(context, ref),
+        onPressed: () => _showGoalSheet(context, ref),
         child: const Icon(Icons.add),
       ),
       body: RefreshIndicator(
@@ -49,29 +50,22 @@ class PlanningScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             accountsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('Error: $e'),
+              loading: () => const SkeletonCard(),
+              error: (error, _) => ErrorState(message: error.toString()),
               data: (accounts) => recurringAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Error: $e'),
-                data: (recurring) => transactionsAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error: $e'),
-                  data: (transactions) {
-                    final points = forecastService.forecast(
-                      accounts: accounts,
-                      recurring: recurring,
-                      expectedIncome: transactions,
-                    );
-                    return SwooshCard(
-                      child: RepaintBoundary(
-                        child: _ForecastChart(points: points),
-                      ),
-                    );
-                  },
-                ),
+                loading: () => const SkeletonCard(),
+                error: (error, _) => ErrorState(message: error.toString()),
+                data: (recurring) {
+                  final points = forecastService.forecast(
+                    accounts: accounts,
+                    recurring: recurring,
+                  );
+                  return SwooshCard(
+                    child: RepaintBoundary(
+                      child: _ForecastChart(points: points),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 12),
@@ -91,8 +85,8 @@ class PlanningScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             goalsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('Error: $e'),
+              loading: () => const SkeletonCard(),
+              error: (error, _) => ErrorState(message: error.toString()),
               data: (goals) {
                 if (goals.isEmpty) {
                   return EmptyState(
@@ -100,7 +94,7 @@ class PlanningScreen extends ConsumerWidget {
                     title: 'No goals yet',
                     subtitle: 'Set a savings target with an optional deadline',
                     action: ElevatedButton(
-                      onPressed: () => _showAddGoal(context, ref),
+                      onPressed: () => _showGoalSheet(context, ref),
                       child: const Text('Add goal'),
                     ),
                   );
@@ -110,7 +104,10 @@ class PlanningScreen extends ConsumerWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: goals.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
+                  itemBuilder: (context, index) => _GoalCard(
+                    goal: goals[index],
+                    onTap: () => _showGoalSheet(context, ref, existing: goals[index]),
+                  ),
                 );
               },
             ),
@@ -121,73 +118,136 @@ class PlanningScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showAddGoal(BuildContext context, WidgetRef ref) async {
-    final nameController = TextEditingController();
-    final targetController = TextEditingController();
-    final currentController = TextEditingController();
+  Future<void> _showGoalSheet(
+    BuildContext context,
+    WidgetRef ref, {
+    Goal? existing,
+  }) async {
+    final nameController = TextEditingController(text: existing?.name ?? '');
+    final targetController = TextEditingController(
+      text: existing != null
+          ? Money.format(existing.targetAmountPence)
+          : '',
+    );
+    final currentController = TextEditingController(
+      text: existing != null
+          ? Money.format(existing.currentAmountPence)
+          : '',
+    );
+    DateTime? targetDate = existing?.targetDate;
 
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Add savings goal',
-              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Goal name'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: targetController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Target amount'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: currentController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Current amount'),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () async {
-                final userId = ref.read(supabaseProvider).auth.currentUser!.id;
-                final repo = ref.read(goalRepositoryProvider);
-                await repo.create(
-                  Goal(
-                    id: '',
-                    userId: userId,
-                    name: nameController.text.trim(),
-                    targetAmountPence:
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                existing == null ? 'Add savings goal' : 'Edit savings goal',
+                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Goal name'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: targetController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Target amount'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: currentController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Current amount'),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Target date (optional)'),
+                subtitle: Text(
+                  targetDate == null
+                      ? 'No deadline'
+                      : '${targetDate!.day}/${targetDate!.month}/${targetDate!.year}',
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: ctx,
+                    initialDate: targetDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2040),
+                  );
+                  if (picked != null) {
+                    setSheetState(() => targetDate = picked);
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  final userId = ref.read(supabaseProvider).auth.currentUser!.id;
+                  final repo = ref.read(goalRepositoryProvider);
+                  final payload = {
+                    'name': nameController.text.trim(),
+                    'target_amount_pence':
                         Money.parseToPence(targetController.text),
-                    currentAmountPence:
+                    'current_amount_pence':
                         Money.parseToPence(currentController.text),
-                    currency: 'GBP',
+                    'target_date': targetDate?.toIso8601String().split('T').first,
+                  };
+
+                  if (existing == null) {
+                    await repo.create(
+                      Goal(
+                        id: '',
+                        userId: userId,
+                        name: payload['name'] as String,
+                        targetAmountPence: payload['target_amount_pence'] as int,
+                        currentAmountPence: payload['current_amount_pence'] as int,
+                        currency: 'GBP',
+                        targetDate: targetDate,
+                      ),
+                    );
+                  } else {
+                    await repo.update(existing.id, payload);
+                  }
+                  ref.invalidate(goalsProvider);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                },
+                child: Text(existing == null ? 'Save goal' : 'Save changes'),
+              ),
+              if (existing != null) ...[
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () async {
+                    await ref.read(goalRepositoryProvider).delete(existing.id);
+                    ref.invalidate(goalsProvider);
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: const Text(
+                    'Delete goal',
+                    style: TextStyle(color: AppColors.error),
                   ),
-                );
-                ref.invalidate(goalsProvider);
-                if (ctx.mounted) Navigator.pop(ctx);
-              },
-              child: const Text('Save goal'),
-            ),
-          ],
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -236,6 +296,8 @@ class _ForecastChart extends StatelessWidget {
             ),
           ],
         ),
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
       ),
     );
   }
@@ -251,13 +313,15 @@ class _ForecastChart extends StatelessWidget {
 }
 
 class _GoalCard extends StatelessWidget {
-  const _GoalCard({required this.goal});
+  const _GoalCard({required this.goal, required this.onTap});
 
   final Goal goal;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return SwooshCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -8,10 +8,12 @@ class AccountRow extends StatelessWidget {
     super.key,
     required this.account,
     this.onTap,
+    this.heroTag,
   });
 
   final Account account;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   Color get _accent {
     switch (account.accountType) {
@@ -24,6 +26,16 @@ class AccountRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icon = Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: _accent.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(Icons.account_balance, color: _accent, size: 22),
+    );
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -33,15 +45,9 @@ class AccountRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _accent.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.account_balance, color: _accent, size: 22),
-              ),
+              heroTag != null
+                  ? Hero(tag: heroTag!, child: icon)
+                  : icon,
               const SizedBox(width: 14),
               Expanded(
                 child: Column(

@@ -4,14 +4,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
+import 'package:swoosh/core/services/account_balance_service.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/services/biometric_service.dart';
 import 'package:swoosh/core/services/categorization_service.dart';
 import 'package:swoosh/core/services/category_matcher_service.dart';
 import 'package:swoosh/core/services/forecast_service.dart';
+import 'package:swoosh/core/services/price_change_service.dart';
 import 'package:swoosh/core/services/recurring_detection_service.dart';
+import 'package:swoosh/core/services/safe_to_spend_service.dart';
 import 'package:swoosh/data/csv_import_service.dart';
 import 'package:swoosh/data/repositories/account_repository.dart';
+import 'package:swoosh/data/repositories/balance_snapshot_repository.dart';
 import 'package:swoosh/data/repositories/bank_connection_repository.dart';
 import 'package:swoosh/data/repositories/budget_repository.dart';
 import 'package:swoosh/data/repositories/category_repository.dart';
@@ -38,15 +42,28 @@ final biometricServiceProvider = Provider<BiometricService>(
   (ref) => BiometricService(LocalAuthentication()),
 );
 
+final accountBalanceServiceProvider = Provider<AccountBalanceService>(
+  (ref) => AccountBalanceService(),
+);
+
 final accountRepositoryProvider = FutureProvider<AccountRepository>((ref) async {
   final cache = await ref.watch(localCacheProvider.future);
-  return AccountRepository(ref.watch(supabaseProvider), cache);
+  return AccountRepository(
+    ref.watch(supabaseProvider),
+    cache,
+    ref.watch(accountBalanceServiceProvider),
+  );
 });
 
 final transactionRepositoryProvider =
     FutureProvider<TransactionRepository>((ref) async {
   final cache = await ref.watch(localCacheProvider.future);
-  return TransactionRepository(ref.watch(supabaseProvider), cache);
+  final accountRepo = await ref.watch(accountRepositoryProvider.future);
+  return TransactionRepository(
+    ref.watch(supabaseProvider),
+    cache,
+    accountRepo,
+  );
 });
 
 final categoryRepositoryProvider = Provider<CategoryRepository>(
@@ -100,8 +117,20 @@ final balanceHistoryServiceProvider = Provider<BalanceHistoryService>(
   (ref) => BalanceHistoryService(),
 );
 
+final balanceSnapshotRepositoryProvider = Provider<BalanceSnapshotRepository>(
+  (ref) => BalanceSnapshotRepository(ref.watch(supabaseProvider)),
+);
+
 final forecastServiceProvider = Provider<ForecastService>(
   (ref) => ForecastService(),
+);
+
+final safeToSpendServiceProvider = Provider<SafeToSpendService>(
+  (ref) => SafeToSpendService(),
+);
+
+final priceChangeServiceProvider = Provider<PriceChangeService>(
+  (ref) => PriceChangeService(),
 );
 
 final recurringDetectionServiceProvider = Provider<RecurringDetectionService>(

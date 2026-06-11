@@ -1,17 +1,22 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
+import 'package:swoosh/data/repositories/account_repository.dart';
 import 'package:swoosh/models/transaction.dart';
 
 class TransactionRepository {
-  TransactionRepository(this._client, this._cache);
+  TransactionRepository(this._client, this._cache, this._accountRepo);
 
   final SupabaseClient _client;
   final LocalCache _cache;
+  final AccountRepository _accountRepo;
+
+  static const _selectWithJoins =
+      '*, categories(name, color), accounts(name)';
 
   Future<List<Transaction>> fetchAll({int limit = 500}) async {
     final data = await _client
         .from('transactions')
-        .select('*, categories(name, color), accounts(name)')
+        .select(_selectWithJoins)
         .order('transaction_date', ascending: false)
         .limit(limit);
     return (data as List).map((e) => Transaction.fromJson(e)).toList();
@@ -20,7 +25,7 @@ class TransactionRepository {
   Future<List<Transaction>> fetchUncategorized({int limit = 1000}) async {
     final data = await _client
         .from('transactions')
-        .select('*, categories(name, color), accounts(name)')
+        .select(_selectWithJoins)
         .isFilter('category_id', null)
         .order('transaction_date', ascending: false)
         .limit(limit);
@@ -35,16 +40,55 @@ class TransactionRepository {
         .from('transactions')
         .update({'category_id': categoryId})
         .eq('id', transactionId)
-        .select('*, categories(name, color), accounts(name)')
+        .select(_selectWithJoins)
         .single();
     return Transaction.fromJson(data);
+  }
+
+  Future<Transaction> updateExcludeFromAnalytics({
+    required String transactionId,
+    required bool exclude,
+  }) async {
+    final data = await _client
+        .from('transactions')
+        .update({'exclude_from_analytics': exclude})
+        .eq('id', transactionId)
+        .select(_selectWithJoins)
+        .single();
+    return Transaction.fromJson(data);
+  }
+
+  Future<Transaction> update({
+    required String transactionId,
+    required Map<String, dynamic> updates,
+  }) async {
+    final data = await _client
+        .from('transactions')
+        .update(updates)
+        .eq('id', transactionId)
+        .select(_selectWithJoins)
+        .single();
+    final transaction = Transaction.fromJson(data);
+    await _accountRepo.recomputeBalance(transaction.accountId);
+    return transaction;
+  }
+
+  Future<void> delete(String transactionId) async {
+    final existing = await _client
+        .from('transactions')
+        .select('account_id')
+        .eq('id', transactionId)
+        .single();
+    final accountId = existing['account_id'] as String;
+    await _client.from('transactions').delete().eq('id', transactionId);
+    await _accountRepo.recomputeBalance(accountId);
   }
 
   Future<List<Transaction>> fetchRecent({int limit = 50}) async {
     try {
       final data = await _client
           .from('transactions')
-          .select('*, categories(name, color), accounts(name)')
+          .select(_selectWithJoins)
           .order('transaction_date', ascending: false)
           .limit(limit);
       final list = (data as List).cast<Map<String, dynamic>>();
@@ -82,9 +126,11 @@ class TransactionRepository {
     final data = await _client
         .from('transactions')
         .insert(transaction.toInsertJson())
-        .select('*, categories(name, color), accounts(name)')
+        .select(_selectWithJoins)
         .single();
-    return Transaction.fromJson(data);
+    final created = Transaction.fromJson(data);
+    await _accountRepo.recomputeBalance(created.accountId);
+    return created;
   }
 
   Future<int> importCsvRows({
@@ -97,6 +143,9 @@ class TransactionRepository {
         await _client.from('transactions').insert(row);
         imported++;
       } catch (_) {}
+    }
+    if (imported > 0) {
+      await _accountRepo.recomputeBalance(accountId);
     }
     return imported;
   }

@@ -78,6 +78,26 @@ async function fetchAllTransactions(accountUid: string) {
   return transactions;
 }
 
+function normalizeMatcher(value: string) {
+  return value.toLowerCase().trim();
+}
+
+function resolveCategoryId(
+  categoriesByName: Map<string, string>,
+  rules: Array<{ matcher: string; matcher_type: string; category_id: string }>,
+  merchant: string,
+) {
+  const merchantKey = normalizeMatcher(merchant);
+  for (const rule of rules) {
+    if (rule.matcher_type !== 'merchant' && rule.matcher_type !== 'keyword') continue;
+    const matcher = normalizeMatcher(rule.matcher);
+    if (merchantKey.includes(matcher) || matcher.includes(merchantKey)) {
+      return rule.category_id;
+    }
+  }
+  return categoriesByName.get('general') ?? null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -143,6 +163,22 @@ Deno.serve(async (req) => {
     let accountsSynced = 0;
     let transactionsSynced = 0;
 
+    const { data: categories } = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('user_id', user.id);
+    const categoriesByName = new Map<string, string>(
+      (categories ?? []).map((c: { id: string; name: string }) => [
+        c.name.toLowerCase(),
+        c.id,
+      ]),
+    );
+
+    const { data: rules } = await supabase
+      .from('category_rules')
+      .select('matcher, matcher_type, category_id')
+      .eq('user_id', user.id);
+
     for (const sessionAccount of sessionData.accounts ?? []) {
       const accountUid = sessionAccount.uid;
       if (!accountUid) continue;
@@ -190,7 +226,13 @@ Deno.serve(async (req) => {
         if (!date) continue;
 
         const description = transactionDescription(tx);
+        const merchant = tx.creditor?.name ?? description;
         const hash = dedupeHash(account.id, date, amount, description);
+        const categoryId = resolveCategoryId(
+          categoriesByName,
+          rules ?? [],
+          merchant,
+        );
 
         try {
           await supabase.from('transactions').insert({
@@ -200,7 +242,8 @@ Deno.serve(async (req) => {
             amount_pence: amount,
             currency: tx.transaction_amount?.currency ?? 'GBP',
             description,
-            merchant: tx.creditor?.name ?? description,
+            merchant,
+            category_id: categoryId,
             source: 'openbanking',
             external_ref: tx.transaction_id ?? tx.entry_reference,
             dedupe_hash: hash,

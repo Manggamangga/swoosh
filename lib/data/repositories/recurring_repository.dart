@@ -23,6 +23,16 @@ class RecurringRepository {
     return RecurringPayment.fromJson(data);
   }
 
+  Future<RecurringPayment> update(String id, Map<String, dynamic> updates) async {
+    final data = await _client
+        .from('recurring_payments')
+        .update(updates)
+        .eq('id', id)
+        .select('*, categories(name)')
+        .single();
+    return RecurringPayment.fromJson(data);
+  }
+
   Future<void> delete(String id) async {
     await _client.from('recurring_payments').delete().eq('id', id);
   }

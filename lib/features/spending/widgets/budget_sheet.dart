@@ -88,7 +88,7 @@ Future<void> showBudgetSheet(
                   amountPence: Money.parseToPence(amountController.text),
                   categoryName: categoryName ?? existingBudget?.categoryName,
                   categoryColor:
-                      existingBudget?.categoryColor ?? '#a855f7',
+                      existingBudget?.categoryColor ?? '#A855F7',
                 ),
               );
               ref.invalidate(budgetsProvider);
@@ -98,6 +98,23 @@ Future<void> showBudgetSheet(
             },
             child: Text(isEditing ? 'Save changes' : 'Save budget'),
           ),
+          if (isEditing) ...[
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () async {
+                await ref.read(budgetRepositoryProvider).delete(existingBudget.id);
+                ref.invalidate(budgetsProvider);
+                ref.invalidate(budgetsForMonthProvider(month));
+                ref.invalidate(spendingMonthProvider(month));
+                ref.invalidate(safeToSpendProvider);
+                if (ctx.mounted) Navigator.pop(ctx);
+              },
+              child: const Text(
+                'Remove budget',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
+          ],
         ],
       ),
     ),
