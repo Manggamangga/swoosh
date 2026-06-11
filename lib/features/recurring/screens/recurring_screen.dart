@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/fab_location.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
@@ -27,6 +28,8 @@ class RecurringScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButtonLocation:
+          FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddRecurring(context, ref),
         child: const Icon(Icons.add),

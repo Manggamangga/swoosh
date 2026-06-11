@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/fab_location.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/account_row.dart';
@@ -38,6 +39,8 @@ class AccountsScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButtonLocation:
+          FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showAddAccountChooser(context),
         icon: const Icon(Icons.add),

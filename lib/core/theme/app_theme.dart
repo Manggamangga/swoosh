@@ -81,6 +81,12 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         insetPadding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
       ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
 
     return base.copyWith(

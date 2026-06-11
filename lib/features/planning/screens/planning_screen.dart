@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/services/forecast_service.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/fab_location.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
@@ -25,6 +26,8 @@ class PlanningScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Planning')),
+      floatingActionButtonLocation:
+          FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddGoal(context, ref),
         child: const Icon(Icons.add),
@@ -75,7 +78,7 @@ class PlanningScreen extends ConsumerWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => context.push('/recurring'),
+                onPressed: () => context.push('/planning/recurring'),
                 child: const Text('Recurring payments'),
               ),
             ),

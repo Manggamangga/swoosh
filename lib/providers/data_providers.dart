@@ -1,4 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:swoosh/core/services/balance_history_service.dart';
+import 'package:swoosh/core/utils/analytics.dart';
+import 'package:swoosh/core/widgets/period_pills.dart';
+import 'package:swoosh/features/home/home_balance_view.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/budget.dart';
 import 'package:swoosh/models/category.dart';
@@ -27,16 +31,26 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
 });
 
 final budgetsProvider = FutureProvider<List<Budget>>((ref) async {
-  final repo = ref.watch(budgetRepositoryProvider);
-  final txRepo = await ref.watch(transactionRepositoryProvider.future);
   final now = DateTime.now();
-  final budgets = await repo.fetchForMonth(now);
-  final transactions = await txRepo.fetchForPeriod(
-    DateTime(now.year, now.month, 1),
-    DateTime(now.year, now.month + 1, 0),
-  );
-  return repo.withSpent(budgets, transactions);
+  return ref.watch(budgetsForMonthProvider(DateTime(now.year, now.month, 1)).future);
 });
+
+final budgetsForMonthProvider = FutureProvider.family<List<Budget>, DateTime>(
+  (ref, month) async {
+    final repo = ref.watch(budgetRepositoryProvider);
+    final accounts = await ref.watch(accountsProvider.future);
+    final everydayIds = everydayAccountIds(accounts);
+    final txRepo = await ref.watch(transactionRepositoryProvider.future);
+    final start = monthStart(month);
+    final end = monthEnd(month);
+    final budgets = await repo.fetchForMonth(month);
+    final transactions = everydayTransactions(
+      await txRepo.fetchForPeriod(start, end),
+      everydayIds,
+    );
+    return repo.withSpent(budgets, transactions);
+  },
+);
 
 final recurringProvider = FutureProvider<List<RecurringPayment>>((ref) async {
   return ref.watch(recurringRepositoryProvider).fetchAll();
@@ -47,27 +61,194 @@ final goalsProvider = FutureProvider<List<Goal>>((ref) async {
 });
 
 final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
-  final transactions = await ref.watch(transactionsProvider.future);
+  final accounts = await ref.watch(accountsProvider.future);
+  final everydayIds = everydayAccountIds(accounts);
+  final txRepo = await ref.watch(transactionRepositoryProvider.future);
   final now = DateTime.now();
-  final start = DateTime(now.year, now.month, 1);
-  final end = DateTime(now.year, now.month + 1, 0);
+  final start = monthStart(now);
+  final end = monthEnd(now);
+  final transactions = everydayTransactions(
+    await txRepo.fetchForPeriod(start, end),
+    everydayIds,
+  );
 
-  var income = 0;
-  var spending = 0;
-  for (final tx in transactions) {
-    if (tx.excludeFromAnalytics) continue;
-    if (tx.transactionDate.isBefore(start) || tx.transactionDate.isAfter(end)) {
-      continue;
-    }
-    if (tx.amountPence > 0) {
-      income += tx.amountPence;
-    } else {
-      spending += tx.amountPence.abs();
-    }
-  }
-
-  return MonthlySummary(incomePence: income, spendingPence: spending);
+  return MonthlySummary(
+    incomePence: sumIncome(transactions),
+    spendingPence: sumSpending(transactions),
+  );
 });
+
+final chartTransactionsProvider =
+    FutureProvider.family<List<Transaction>, ChartPeriod>((ref, period) async {
+  final txRepo = await ref.watch(transactionRepositoryProvider.future);
+  final now = DateTime.now();
+  final start = period.startFrom(now);
+  return txRepo.fetchForPeriod(start, now);
+});
+
+typedef BalanceHistoryKey = (ChartPeriod period, HomeBalanceView view);
+
+final balanceHistoryProvider =
+    Provider.family<List<BalancePoint>, BalanceHistoryKey>((ref, key) {
+  final (period, view) = key;
+  final accounts = ref.watch(accountsProvider).valueOrNull ?? const [];
+  final chartTransactions =
+      ref.watch(chartTransactionsProvider(period)).valueOrNull ?? const [];
+  final balanceService = ref.watch(balanceHistoryServiceProvider);
+
+  final filtered = accountsForView(accounts, view);
+  if (filtered.isEmpty) return const [];
+
+  final now = DateTime.now();
+  final start = period.startFrom(now);
+  final accountIds = filtered.map((account) => account.id).toSet();
+  final periodTransactions = chartTransactions
+      .where((transaction) => accountIds.contains(transaction.accountId))
+      .toList();
+
+  return balanceService.buildHistory(
+    accounts: filtered,
+    transactions: periodTransactions,
+    start: start,
+    end: now,
+  );
+});
+
+final spendingMonthProvider =
+    FutureProvider.family<SpendingMonthData, DateTime>((ref, month) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  final everydayIds = everydayAccountIds(accounts);
+  final txRepo = await ref.watch(transactionRepositoryProvider.future);
+  final budgetRepo = ref.watch(budgetRepositoryProvider);
+
+  final currentStart = monthStart(month);
+  final currentEnd = monthEnd(month);
+  final prevMonth = DateTime(month.year, month.month - 1, 1);
+  final prevStart = monthStart(prevMonth);
+
+  final allTransactions = everydayTransactions(
+    await txRepo.fetchForPeriod(prevStart, currentEnd),
+    everydayIds,
+  );
+  final currentTransactions = allTransactions
+      .where((t) => isInMonth(t.transactionDate, month))
+      .toList();
+  final previousTransactions = allTransactions
+      .where((t) => isInMonth(t.transactionDate, prevMonth))
+      .toList();
+
+  final budgets = await budgetRepo.fetchForMonth(month);
+  final budgetsWithSpent = budgetRepo.withSpent(budgets, currentTransactions);
+  final budgetByCategory = {
+    for (final budget in budgetsWithSpent) budget.categoryId: budget,
+  };
+
+  final currentByCategory = _groupSpendingByCategory(currentTransactions);
+  final previousByCategory = _groupSpendingByCategory(previousTransactions);
+
+  final categoryIds = {
+    ...currentByCategory.keys,
+    ...previousByCategory.keys,
+  };
+
+  final rows = categoryIds.map((categoryId) {
+    final budget = budgetByCategory[categoryId];
+    final current = currentByCategory[categoryId];
+    return CategorySpendingRow(
+      categoryId: categoryId,
+      categoryName: current?.name ?? budget?.categoryName ?? 'Uncategorized',
+      categoryColor: current?.color ?? budget?.categoryColor ?? '#64748B',
+      spentPence: current?.spentPence ?? 0,
+      previousSpentPence: previousByCategory[categoryId]?.spentPence ?? 0,
+      budget: budget,
+    );
+  }).toList()
+    ..sort((a, b) => b.spentPence.compareTo(a.spentPence));
+
+  return SpendingMonthData(
+    month: currentStart,
+    totalSpentPence: sumSpending(currentTransactions),
+    categories: rows,
+  );
+});
+
+final upcomingRecurringProvider =
+    FutureProvider<List<RecurringPayment>>((ref) async {
+  final recurring = await ref.watch(recurringProvider.future);
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final windowEnd = today.add(const Duration(days: 30));
+
+  return recurring
+      .where(
+        (payment) =>
+            !payment.nextDate.isBefore(today) &&
+            !payment.nextDate.isAfter(windowEnd),
+      )
+      .toList()
+    ..sort((a, b) => a.nextDate.compareTo(b.nextDate));
+});
+
+Map<String, _CategorySpend> _groupSpendingByCategory(
+  List<Transaction> transactions,
+) {
+  final grouped = <String, _CategorySpend>{};
+  for (final tx in transactions) {
+    if (tx.amountPence >= 0) continue;
+    final categoryId = tx.categoryId ?? '_uncategorized';
+    final existing = grouped[categoryId];
+    grouped[categoryId] = _CategorySpend(
+      name: tx.categoryName ?? existing?.name ?? 'Uncategorized',
+      color: tx.categoryColor ?? existing?.color ?? '#64748B',
+      spentPence: (existing?.spentPence ?? 0) + tx.amountPence.abs(),
+    );
+  }
+  return grouped;
+}
+
+class _CategorySpend {
+  const _CategorySpend({
+    required this.name,
+    required this.color,
+    required this.spentPence,
+  });
+
+  final String name;
+  final String color;
+  final int spentPence;
+}
+
+class SpendingMonthData {
+  const SpendingMonthData({
+    required this.month,
+    required this.totalSpentPence,
+    required this.categories,
+  });
+
+  final DateTime month;
+  final int totalSpentPence;
+  final List<CategorySpendingRow> categories;
+}
+
+class CategorySpendingRow {
+  const CategorySpendingRow({
+    required this.categoryId,
+    required this.categoryName,
+    required this.categoryColor,
+    required this.spentPence,
+    required this.previousSpentPence,
+    this.budget,
+  });
+
+  final String categoryId;
+  final String categoryName;
+  final String categoryColor;
+  final int spentPence;
+  final int previousSpentPence;
+  final Budget? budget;
+
+  int get changePence => spentPence - previousSpentPence;
+}
 
 class MonthlySummary {
   const MonthlySummary({

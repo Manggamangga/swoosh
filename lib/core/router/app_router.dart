@@ -8,7 +8,7 @@ import 'package:swoosh/features/accounts/screens/csv_import_screen.dart';
 import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/features/auth/screens/login_screen.dart';
 import 'package:swoosh/features/auth/screens/unlock_screen.dart';
-import 'package:swoosh/features/budgets/screens/budgets_screen.dart';
+import 'package:swoosh/features/spending/screens/spending_screen.dart';
 import 'package:swoosh/features/home/screens/home_screen.dart';
 import 'package:swoosh/features/openbanking/screens/connect_bank_screen.dart';
 import 'package:swoosh/features/planning/screens/planning_screen.dart';
@@ -38,16 +38,62 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/unlock', builder: (_, __) => const UnlockScreen()),
-      ShellRoute(
-        builder: (_, __, child) => AppShell(child: child),
-        routes: [
-          GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
-          GoRoute(path: '/accounts', builder: (_, __) => const AccountsScreen()),
-          GoRoute(path: '/budgets', builder: (_, __) => const BudgetsScreen()),
-          GoRoute(path: '/planning', builder: (_, __) => const PlanningScreen()),
-          GoRoute(
-            path: '/recurring',
-            builder: (_, __) => const RecurringScreen(),
+      GoRoute(
+        path: '/budgets',
+        redirect: (_, __) => '/spending',
+      ),
+      GoRoute(
+        path: '/recurring',
+        redirect: (_, __) => '/planning/recurring',
+      ),
+      StatefulShellRoute(
+        builder: (_, __, navigationShell) {
+          return AppShell(navigationShell: navigationShell);
+        },
+        navigatorContainerBuilder: (_, navigationShell, children) {
+          return AnimatedBranchStack(
+            currentIndex: navigationShell.currentIndex,
+            children: children,
+          );
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (_, __) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/accounts',
+                builder: (_, __) => const AccountsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/spending',
+                builder: (_, __) => const SpendingScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/planning',
+                builder: (_, __) => const PlanningScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'recurring',
+                    builder: (_, __) => const RecurringScreen(),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

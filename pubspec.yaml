@@ -1,7 +1,7 @@
 name: swoosh
 description: Personal finance tracker for accounts, budgets, and planning.
 publish_to: 'none'
-version: 1.1.0+2
+version: 1.2.0+3
 
 environment:
   sdk: ^3.9.2

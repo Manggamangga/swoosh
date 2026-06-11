@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
 abstract final class ViewInsets {
-  static const navigationBarHeight = 80.0;
+  static const navigationBarHeight = 72.0;
+
+  static double safeBottom(BuildContext context) {
+    final view = View.of(context);
+    return view.viewPadding.bottom / view.devicePixelRatio;
+  }
 
   static double bottomClearance(BuildContext context) {
-    return MediaQuery.paddingOf(context).bottom + navigationBarHeight;
+    return navigationBarHeight + safeBottom(context);
   }
 
   static EdgeInsets listPadding(

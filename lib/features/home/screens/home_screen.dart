@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
@@ -13,8 +14,12 @@ import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/core/widgets/transaction_tile.dart';
 import 'package:swoosh/features/accounts/widgets/add_account_chooser.dart';
+import 'package:swoosh/features/home/home_balance_view.dart';
 import 'package:swoosh/features/home/widgets/balance_chart.dart';
+import 'package:swoosh/features/home/widgets/upcoming_bills_card.dart';
 import 'package:swoosh/models/account.dart';
+import 'package:swoosh/models/recurring_payment.dart';
+import 'package:swoosh/models/transaction.dart';
 import 'package:swoosh/providers/data_providers.dart';
 import 'package:swoosh/providers/providers.dart';
 
@@ -27,23 +32,121 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   ChartPeriod _period = ChartPeriod.threeMonths;
-  AccountType _selectedType = AccountType.everyday;
+  HomeBalanceView _view = HomeBalanceView.everyday;
+  bool _isSyncing = false;
+
+  Future<void> _syncAll() async {
+    if (_isSyncing) return;
+
+    HapticFeedback.lightImpact();
+    setState(() => _isSyncing = true);
+
+    try {
+      final connections = await ref.read(bankConnectionsProvider.future);
+      var totalAccounts = 0;
+      var totalTransactions = 0;
+      final errors = <String>[];
+
+      if (connections.isEmpty) {
+        ref.invalidate(accountsProvider);
+        ref.invalidate(transactionsProvider);
+        ref.invalidate(monthlySummaryProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Refreshed')),
+          );
+        }
+        return;
+      }
+
+      final repo = ref.read(bankConnectionRepositoryProvider);
+      final results = await Future.wait(
+        connections.map((connection) async {
+          try {
+            return await repo.syncConnection(connection.id);
+          } catch (error) {
+            return {'error': error.toString()};
+          }
+        }),
+      );
+
+      for (final result in results) {
+        if (result.containsKey('error')) {
+          errors.add(result['error'] as String);
+          continue;
+        }
+        totalAccounts += (result['accounts_synced'] as num?)?.toInt() ?? 0;
+        totalTransactions +=
+            (result['transactions_synced'] as num?)?.toInt() ?? 0;
+      }
+
+      ref.invalidate(accountsProvider);
+      ref.invalidate(transactionsProvider);
+      ref.invalidate(monthlySummaryProvider);
+      ref.invalidate(bankConnectionsProvider);
+      ref.invalidate(chartTransactionsProvider(_period));
+      ref.invalidate(upcomingRecurringProvider);
+      ref.invalidate(recurringProvider);
+
+      if (!mounted) return;
+
+      if (errors.isNotEmpty && totalAccounts == 0 && totalTransactions == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sync failed: ${errors.first}')),
+        );
+      } else {
+        final message = errors.isEmpty
+            ? 'Synced $totalAccounts account(s), $totalTransactions transaction(s)'
+            : 'Synced $totalAccounts account(s), $totalTransactions transaction(s). '
+                '${errors.length} connection(s) failed.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
+  }
+
+  List<Account> _accountsForView(List<Account> accounts) {
+    return accountsForView(accounts, _view);
+  }
+
+  int _monthRecurringTotal(List<RecurringPayment> payments) {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+    final monthEnd = DateTime(now.year, now.month + 1, 0);
+    return payments
+        .where(
+          (payment) =>
+              !payment.nextDate.isBefore(monthStart) &&
+              !payment.nextDate.isAfter(monthEnd),
+        )
+        .fold<int>(0, (sum, payment) => sum + payment.amountPence);
+  }
 
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsProvider);
     final transactionsAsync = ref.watch(transactionsProvider);
+    final chartTransactionsAsync = ref.watch(chartTransactionsProvider(_period));
+    final balanceHistory = ref.watch(balanceHistoryProvider((_period, _view)));
     final summaryAsync = ref.watch(monthlySummaryProvider);
-    final balanceService = ref.watch(balanceHistoryServiceProvider);
+    final upcomingAsync = ref.watch(upcomingRecurringProvider);
+    final recurringAsync = ref.watch(recurringProvider);
     final bottomPadding = ViewInsets.bottomClearance(context);
+
+    final accounts = accountsAsync.valueOrNull;
+    final chartLoading =
+        chartTransactionsAsync.isLoading && chartTransactionsAsync.valueOrNull == null;
+    final transactions = transactionsAsync.valueOrNull;
+    final summary = summaryAsync.valueOrNull;
+    final upcoming = upcomingAsync.valueOrNull ?? const [];
+    final recurring = recurringAsync.valueOrNull ?? const [];
 
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(accountsProvider);
-          ref.invalidate(transactionsProvider);
-          ref.invalidate(monthlySummaryProvider);
-        },
+        onRefresh: _syncAll,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
@@ -51,12 +154,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title: const Text('Overview'),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.sync),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    ref.invalidate(accountsProvider);
-                    ref.invalidate(transactionsProvider);
-                  },
+                  onPressed: _isSyncing ? null : _syncAll,
+                  icon: _isSyncing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.sync),
                 ),
               ],
             ),
@@ -64,139 +169,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               sliver: SliverToBoxAdapter(
                 child: _TypeTabs(
-                  selected: _selectedType,
-                  onChanged: (type) => setState(() => _selectedType = type),
+                  selected: _view,
+                  onChanged: (view) => setState(() => _view = view),
                 ),
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               sliver: SliverToBoxAdapter(
-                child: accountsAsync.when(
-                  loading: () => const SkeletonCard(),
-                  error: (e, _) => Text('Error: $e'),
-                  data: (accounts) {
-                    final filtered =
-                        accounts.where((a) => a.accountType == _selectedType);
-                    final total = filtered.fold<int>(
-                      0,
-                      (sum, a) => sum + a.balancePence,
-                    );
-
-                    return transactionsAsync.when(
-                      loading: () => SwooshCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _labelForType(_selectedType),
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              Money.format(total),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 16),
-                            const SkeletonLoader(height: 180),
-                          ],
-                        ),
-                      ),
-                      error: (e, _) => Text('Error: $e'),
-                      data: (transactions) {
-                        final now = DateTime.now();
-                        final start = _period.startFrom(now);
-                        final points = balanceService.buildHistory(
-                          accounts: filtered.toList(),
-                          transactions: transactions,
-                          start: start,
-                          end: now,
-                        );
-
-                        return SwooshCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _labelForType(_selectedType),
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                Money.format(total),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineLarge
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                DateFormat('EEE, d MMMM').format(now),
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              RepaintBoundary(
-                                child: BalanceChart(points: points),
-                              ),
-                              const SizedBox(height: 16),
-                              PeriodPills(
-                                selected: _period,
-                                onChanged: (period) =>
-                                    setState(() => _period = period),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+                child: _buildBalanceCard(
+                  context,
+                  accounts: accounts,
+                  accountsLoading: accounts == null && accountsAsync.isLoading,
+                  balanceHistory: balanceHistory,
+                  chartLoading: chartLoading,
                 ),
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               sliver: SliverToBoxAdapter(
-                child: summaryAsync.when(
-                  loading: () => const SkeletonCard(),
-                  error: (e, _) => const SizedBox.shrink(),
-                  data: (summary) => SwooshCard(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _SummaryColumn(
-                            label: 'Income',
-                            amount: summary.incomePence,
-                            color: AppColors.income,
+                child: summary == null && summaryAsync.isLoading
+                    ? const SkeletonCard()
+                    : summary == null
+                        ? const SizedBox.shrink()
+                        : SwooshCard(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _SummaryColumn(
+                                    label: 'Income',
+                                    amount: summary.incomePence,
+                                    color: AppColors.income,
+                                  ),
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 48,
+                                  color: AppColors.border,
+                                ),
+                                Expanded(
+                                  child: _SummaryColumn(
+                                    label: 'Spending',
+                                    amount: summary.spendingPence,
+                                    color: AppColors.spending,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 48,
-                          color: AppColors.border,
-                        ),
-                        Expanded(
-                          child: _SummaryColumn(
-                            label: 'Spending',
-                            amount: summary.spendingPence,
-                            color: AppColors.spending,
-                          ),
-                        ),
-                      ],
-                    ),
+              ),
+            ),
+            if (upcoming.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: UpcomingBillsCard(
+                    payments: upcoming,
+                    monthTotalPence: _monthRecurringTotal(recurring),
                   ),
                 ),
               ),
-            ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               sliver: SliverToBoxAdapter(
@@ -219,85 +252,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              sliver: transactionsAsync.when(
-                loading: () => const SliverToBoxAdapter(child: SkeletonCard()),
-                error: (e, _) => SliverToBoxAdapter(child: Text('Error: $e')),
-                data: (transactions) {
-                  if (transactions.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: EmptyState(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'No transactions yet',
-                        subtitle: 'Add an account and import or log transactions',
-                        action: ElevatedButton(
-                          onPressed: () => showAddAccountChooser(context),
-                          child: const Text('Add account'),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final preview = transactions.take(5).toList();
-                  return SliverToBoxAdapter(
-                    child: SwooshCard(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      child: Column(
-                        children: preview
-                            .map((transaction) => TransactionTile(transaction: transaction))
-                            .toList(),
-                      ),
-                    ),
-                  );
-                },
+              sliver: SliverToBoxAdapter(
+                child: _buildTransactionsPreview(context, transactions, transactionsAsync),
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              sliver: accountsAsync.when(
-                loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error: (e, _) => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                data: (accounts) {
-                  final filtered =
-                      accounts.where((a) => a.accountType == _selectedType);
-                  if (filtered.isEmpty) {
-                    return const SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-
-                  return SliverMainAxisGroup(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Text(
-                          'Accounts',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                      SliverToBoxAdapter(
-                        child: SwooshCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          child: Column(
-                            children: filtered
-                                .map(
-                                  (account) => AccountRow(
-                                    account: account,
-                                    onTap: () => context.go('/accounts/${account.id}'),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+              sliver: SliverToBoxAdapter(
+                child: _buildAccountsSection(context, accounts),
               ),
             ),
             SliverPadding(
@@ -310,81 +272,230 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  String _labelForType(AccountType type) {
-    return type.name[0].toUpperCase() + type.name.substring(1);
-  }
-}
+  Widget _buildBalanceCard(
+    BuildContext context, {
+    required List<Account>? accounts,
+    required bool accountsLoading,
+    required List<BalancePoint> balanceHistory,
+    required bool chartLoading,
+  }) {
+    if (accountsLoading && accounts == null) {
+      return const SkeletonCard();
+    }
 
-class _TypeTabs extends StatelessWidget {
-  const _TypeTabs({required this.selected, required this.onChanged});
+    if (accounts == null) {
+      return const SizedBox.shrink();
+    }
 
-  final AccountType selected;
-  final ValueChanged<AccountType> onChanged;
+    final filtered = _accountsForView(accounts);
+    final total = filtered.fold<int>(0, (sum, account) => sum + account.balancePence);
+    final now = DateTime.now();
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
+    return SwooshCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...AccountType.values.map((type) {
-            final isSelected = type == selected;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onChanged(type);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.surfaceElevated
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.border,
-                    ),
-                  ),
-                  child: Text(
-                    type.name[0].toUpperCase() + type.name.substring(1),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: const Text(
-                'Net worth',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-              ),
+          Text(
+            labelForHomeBalanceView(_view),
+            style: const TextStyle(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Money.format(total),
+            style: Theme.of(context)
+                .textTheme
+                .headlineLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            DateFormat('EEE, d MMMM').format(now),
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
             ),
+          ),
+          const SizedBox(height: 20),
+          if (chartLoading && balanceHistory.isEmpty)
+            const SkeletonLoader(height: 180)
+          else
+            RepaintBoundary(
+              child: BalanceChart(points: balanceHistory),
+            ),
+          const SizedBox(height: 16),
+          PeriodPills(
+            selected: _period,
+            onChanged: (period) => setState(() => _period = period),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildTransactionsPreview(
+    BuildContext context,
+    List<Transaction>? transactions,
+    AsyncValue<List<Transaction>> transactionsAsync,
+  ) {
+    if (transactions == null && transactionsAsync.isLoading) {
+      return const SkeletonCard();
+    }
+
+    if (transactions == null || transactions.isEmpty) {
+      return EmptyState(
+        icon: Icons.receipt_long_outlined,
+        title: 'No transactions yet',
+        subtitle: 'Add an account and import or log transactions',
+        action: ElevatedButton(
+          onPressed: () => showAddAccountChooser(context),
+          child: const Text('Add account'),
+        ),
+      );
+    }
+
+    final preview = transactions.take(5).toList();
+    return SwooshCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        children: preview
+            .map((transaction) => TransactionTile(transaction: transaction))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildAccountsSection(BuildContext context, List<Account>? accounts) {
+    if (accounts == null || accounts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    if (_view == HomeBalanceView.netWorth) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final type in AccountType.values) ...[
+            if (accounts.any((account) => account.accountType == type)) ...[
+              Text(
+                type.name[0].toUpperCase() + type.name.substring(1),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              SwooshCard(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Column(
+                  children: accounts
+                      .where((account) => account.accountType == type)
+                      .map(
+                        (account) => AccountRow(
+                          account: account,
+                          onTap: () => context.go('/accounts/${account.id}'),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ],
+        ],
+      );
+    }
+
+    final filtered = _accountsForView(accounts);
+    if (filtered.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Accounts',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 12),
+        SwooshCard(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Column(
+            children: filtered
+                .map(
+                  (account) => AccountRow(
+                    account: account,
+                    onTap: () => context.go('/accounts/${account.id}'),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TypeTabs extends StatelessWidget {
+  const _TypeTabs({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final HomeBalanceView selected;
+  final ValueChanged<HomeBalanceView> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = [
+      HomeBalanceView.everyday,
+      HomeBalanceView.savings,
+      HomeBalanceView.netWorth,
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: chips.map((view) {
+          final isSelected = view == selected;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onChanged(view);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.surfaceElevated
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : AppColors.border,
+                  ),
+                ),
+                child: Text(
+                  _label(view),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  String _label(HomeBalanceView view) => labelForHomeBalanceView(view);
 }
 
 class _SummaryColumn extends StatelessWidget {

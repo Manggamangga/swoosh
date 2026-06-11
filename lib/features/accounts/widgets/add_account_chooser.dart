@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 
 Future<void> showAddAccountChooser(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (context) {
+      final bottomPad = ViewInsets.bottomClearance(context);
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomPad),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,7 +129,7 @@ Future<void> showAddAccountChooser(BuildContext context) {
             ),
           ],
         ),
-      ),
-    ),
+      );
+    },
   );
 }

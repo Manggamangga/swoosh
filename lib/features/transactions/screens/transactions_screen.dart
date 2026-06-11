@@ -95,6 +95,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     ref.invalidate(transactionsProvider);
     ref.invalidate(allTransactionsProvider);
     ref.invalidate(budgetsProvider);
+    ref.invalidate(monthlySummaryProvider);
+    final now = DateTime.now();
+    ref.invalidate(spendingMonthProvider(DateTime(now.year, now.month, 1)));
   }
 
   @override

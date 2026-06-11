@@ -11,8 +11,8 @@ A place where money is held or tracked (e.g. Monzo current, Wise GBP, Moneybox I
 _Avoid_: Wallet, pot, bucket
 
 **Account type**:
-How an account is grouped for overview: Everyday or Savings. Everyday is spending money; Savings is set-aside money excluded from the spending view.
-_Avoid_: Category, bucket type
+How an account is grouped for overview: Everyday or Savings. Everyday is spending money; Savings is a real account holding set-aside money (e.g. an ISA), not an envelope. Savings balances count in Net worth, but Savings transactions are excluded from spending analytics; moving money into a Savings account is an Excluded transaction, never spending.
+_Avoid_: Category, bucket type, envelope, pot
 
 **Balance**:
 The current amount held in an account, stored in minor units (pence).
@@ -26,13 +26,17 @@ _Avoid_: Snapshot, checkpoint
 A single movement of money into or out of an account (spend, income, or transfer leg).
 _Avoid_: Payment, entry, line item
 
-**Transfer**:
-A classification for transactions that move money between the user's own accounts; excluded from income/spend analytics. Swoosh only tracks money — it never initiates movements, and users cannot record transfers by hand.
-_Avoid_: Internal payment, move
+**Excluded transaction**:
+A transaction flagged out of income/spend analytics (e.g. moving money to a savings account, or a one-off the user opts out). Set automatically when a provider marks a transaction as a transfer, or manually by the user. There is no pairing of transaction legs — exclusion is per-transaction.
+_Avoid_: Transfer (retired term), internal payment, move
 
 **Category**:
 A label classifying a transaction for budgeting and analytics (e.g. Groceries, Bills).
 _Avoid_: Tag, bucket
+
+**Spending**:
+Money leaving Everyday accounts, excluding Transfers and income. The unit of all budget and category analytics. Savings account activity is never spending.
+_Avoid_: Expenses, outgoings
 
 **Net worth**:
 The sum of all account balances across Everyday and Savings types.
@@ -47,6 +51,10 @@ _Avoid_: Link, integration, bank link
 **Source**:
 How data entered Swoosh: manual entry, CSV import, or openbanking sync.
 _Avoid_: Origin, provider
+
+**Sync**:
+Pulling the latest balances and transactions from a Connection into Swoosh. A dashboard sync runs across all Connections at once; previously synced data stays visible while it runs. Sync never changes user-owned data (e.g. account names).
+_Avoid_: Refresh (that's re-reading already-stored data), update
 
 **Dedupe hash**:
 A fingerprint preventing the same transaction from being imported twice.
@@ -63,8 +71,16 @@ A monthly spending limit for a category.
 _Avoid_: Cap, allowance, envelope
 
 **Recurring payment**:
-A transaction expected on a regular cadence (e.g. rent monthly, subscription annually).
+A transaction expected on a regular cadence (e.g. rent monthly, subscription annually). Amount may be positive — recurring income (e.g. salary) is modelled as a Recurring payment with a positive amount.
 _Avoid_: Subscription, standing order, direct debit
+
+**Expected income**:
+A Recurring payment with a positive amount and a known cadence (e.g. monthly salary on a payday). Anchors Forecast and Safe to spend.
+_Avoid_: Salary entry, paycheck
+
+**Safe to spend**:
+Everyday balance minus Recurring payments due before the next Expected income date, minus remaining Budget allocations for the current month. The headline forward-looking number.
+_Avoid_: Disposable income, available balance
 
 **Goal**:
 A savings target with an amount and optional deadline.
@@ -78,7 +94,7 @@ _Avoid_: Projection, prediction, estimate
 
 > **Sean:** I moved £500 from Monzo to Wise — why didn't my spending go up?
 >
-> **Expert:** That's a **Transfer**, not spending. Swoosh links both **Transaction** legs and excludes them from analytics. Your **Budget** for Groceries is unaffected.
+> **Expert:** That's an **Excluded transaction**, not spending. The provider flagged it as a transfer, so it's excluded from analytics. Your **Budget** for Groceries is unaffected.
 >
 > **Sean:** I re-imported my Barclays CSV and now I have duplicates.
 >
@@ -86,4 +102,4 @@ _Avoid_: Projection, prediction, estimate
 >
 > **Sean:** What's my **Net worth**?
 >
-> **Expert:** Sum of **Balance** across all **Account** types — Everyday, Savings, and Investment. **Forecast** looks forward from that using **Recurring payment** schedules.
+> **Expert:** Sum of **Balance** across all **Account** types — Everyday and Savings. **Forecast** looks forward from that using **Recurring payment** schedules, including **Expected income**.
