@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/app_snackbar.dart';
 import 'package:swoosh/core/theme/fab_location.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/utils/money.dart';
@@ -40,6 +41,7 @@ class RecurringScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(recurringProvider),
         child: recurringAsync.when(
+          skipLoadingOnReload: true,
           loading: () => ListView(
             padding: ViewInsets.listPadding(context, includeFab: true),
             children: const [SkeletonCard(), SizedBox(height: 12), SkeletonCard()],
@@ -149,9 +151,7 @@ class RecurringScreen extends ConsumerWidget {
     ref.invalidate(recurringProvider);
     ref.invalidate(safeToSpendProvider);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Detected ${detected.length} recurring payments')),
-      );
+      showAppSnackBar(context, 'Detected ${detected.length} recurring payments');
     }
   }
 

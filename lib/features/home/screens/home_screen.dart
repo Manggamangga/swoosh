@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/app_snackbar.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/account_row.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
+import 'package:swoosh/core/widgets/frosted_sliver_app_bar.dart';
 import 'package:swoosh/core/widgets/period_pills.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
@@ -56,9 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.invalidate(transactionsProvider);
         ref.invalidate(monthlySummaryProvider);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Refreshed')),
-          );
+          showAppSnackBar(context, 'Refreshed');
         }
         return;
       }
@@ -98,17 +98,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
 
       if (errors.isNotEmpty && totalAccounts == 0 && totalTransactions == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sync failed: ${errors.first}')),
-        );
+        showAppSnackBar(context, 'Sync failed: ${errors.first}');
       } else {
         final message = errors.isEmpty
             ? 'Synced $totalAccounts account(s), $totalTransactions transaction(s)'
             : 'Synced $totalAccounts account(s), $totalTransactions transaction(s). '
                 '${errors.length} connection(s) failed.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        showAppSnackBar(context, message);
       }
     } finally {
       if (mounted) setState(() => _isSyncing = false);
@@ -158,8 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onRefresh: _syncAll,
         child: CustomScrollView(
           slivers: [
-            SliverAppBar(
-              floating: true,
+            FrostedSliverAppBar(
               title: const Text('Overview'),
               actions: [
                 IconButton(
@@ -203,6 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               sliver: SliverToBoxAdapter(
                 child: safeToSpendAsync.when(
+                  skipLoadingOnReload: true,
                   loading: () => const SkeletonCard(),
                   error: (_, __) => const SizedBox.shrink(),
                   data: (result) => SafeToSpendCard(result: result),
@@ -213,6 +209,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               sliver: SliverToBoxAdapter(
                 child: priceAlertsAsync.when(
+                  skipLoadingOnReload: true,
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
                   data: (alerts) {
@@ -360,6 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 20),
           balanceHistoryAsync.when(
+            skipLoadingOnReload: true,
             loading: () => chartLoading
                 ? const SkeletonLoader(height: 180)
                 : const SkeletonLoader(height: 180),

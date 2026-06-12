@@ -109,18 +109,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => AccountDetailScreen(
           accountId: state.pathParameters['id']!,
         ),
-      ),
-      GoRoute(
-        path: '/accounts/:id/add-tx',
-        builder: (_, state) => AddTransactionScreen(
-          accountId: state.pathParameters['id']!,
-        ),
-      ),
-      GoRoute(
-        path: '/accounts/:id/import',
-        builder: (_, state) => CsvImportScreen(
-          accountId: state.pathParameters['id']!,
-        ),
+        routes: [
+          GoRoute(
+            path: 'add-tx',
+            builder: (_, state) => AddTransactionScreen(
+              accountId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: 'import',
+            builder: (_, state) => CsvImportScreen(
+              accountId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: '/connect-bank',

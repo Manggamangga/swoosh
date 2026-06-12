@@ -2,10 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/providers/data_providers.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -35,21 +37,38 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    _warmShellProviders(ref);
+
     return PopScope(
       canPop: _canPopApp(context),
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handlePop(context);
       },
-      child: Scaffold(
-        extendBody: true,
-        body: navigationShell,
-        bottomNavigationBar: _FrostedNavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onDestinationSelected,
+      child: ScaffoldMessenger(
+        child: Scaffold(
+          extendBody: true,
+          body: navigationShell,
+          bottomNavigationBar: _FrostedNavigationBar(
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: _onDestinationSelected,
+          ),
         ),
       ),
     );
+  }
+
+  void _warmShellProviders(WidgetRef ref) {
+    ref.watch(accountsProvider);
+    ref.watch(transactionsProvider);
+    ref.watch(recurringProvider);
+    ref.watch(goalsProvider);
+    ref.watch(categoriesProvider);
+    ref.watch(monthlySummaryProvider);
+    ref.watch(safeToSpendProvider);
+    ref.watch(upcomingRecurringProvider);
+    final now = DateTime.now();
+    ref.watch(spendingMonthProvider(DateTime(now.year, now.month, 1)));
   }
 }
 
@@ -78,7 +97,7 @@ class AnimatedBranchStack extends StatelessWidget {
   }
 }
 
-class _BranchFadeTransition extends StatefulWidget {
+class _BranchFadeTransition extends StatelessWidget {
   const _BranchFadeTransition({
     required this.visible,
     required this.child,
@@ -88,52 +107,16 @@ class _BranchFadeTransition extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_BranchFadeTransition> createState() => _BranchFadeTransitionState();
-}
-
-class _BranchFadeTransitionState extends State<_BranchFadeTransition> {
-  late bool _onStage;
-
-  @override
-  void initState() {
-    super.initState();
-    _onStage = widget.visible;
-  }
-
-  @override
-  void didUpdateWidget(_BranchFadeTransition oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.visible && !oldWidget.visible) {
-      _onStage = true;
-    }
-  }
-
-  void _handleFadeEnd() {
-    if (!widget.visible && _onStage) {
-      setState(() => _onStage = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: widget.visible ? 1 : 0,
-      duration: const Duration(milliseconds: 250),
+      opacity: visible ? 1 : 0,
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
-      onEnd: _handleFadeEnd,
-      child: AnimatedSlide(
-        offset: widget.visible ? Offset.zero : const Offset(0, 0.02),
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        child: IgnorePointer(
-          ignoring: !widget.visible,
-          child: TickerMode(
-            enabled: widget.visible,
-            child: Offstage(
-              offstage: !_onStage,
-              child: widget.child,
-            ),
-          ),
+      child: IgnorePointer(
+        ignoring: !visible,
+        child: TickerMode(
+          enabled: visible,
+          child: child,
         ),
       ),
     );

@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/sheet_navigation.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
-import 'package:swoosh/features/accounts/widgets/csv_account_picker.dart';
+import 'package:swoosh/features/accounts/widgets/csv_import_flow.dart';
 
 Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
+  final router = GoRouter.of(context);
+  final parentContext = context;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (context) {
-      final bottomPad = ViewInsets.bottomClearance(context);
+    builder: (sheetContext) {
+      final bottomPad = ViewInsets.bottomClearance(sheetContext);
       return SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomPad),
         child: Column(
@@ -33,8 +36,8 @@ Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
             const SizedBox(height: 16),
             SwooshCard(
               onTap: () {
-                Navigator.pop(context);
-                context.push('/connect-bank');
+                Navigator.pop(sheetContext);
+                pushAfterSheetDismiss(router, '/connect-bank');
               },
               child: const Row(
                 children: [
@@ -66,8 +69,8 @@ Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
             const SizedBox(height: 12),
             SwooshCard(
               onTap: () {
-                Navigator.pop(context);
-                context.push('/accounts/add');
+                Navigator.pop(sheetContext);
+                pushAfterSheetDismiss(router, '/accounts/add');
               },
               child: const Row(
                 children: [
@@ -99,8 +102,8 @@ Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
             const SizedBox(height: 12),
             SwooshCard(
               onTap: () {
-                Navigator.pop(context);
-                showCsvAccountPicker(context, ref);
+                Navigator.pop(sheetContext);
+                showCsvImportFlow(parentContext, ref);
               },
               child: const Row(
                 children: [
@@ -116,7 +119,7 @@ Future<void> showAddAccountChooser(BuildContext context, WidgetRef ref) {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Pick an account and import a statement',
+                          'Pick a statement — bank and balance inferred automatically',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 13,

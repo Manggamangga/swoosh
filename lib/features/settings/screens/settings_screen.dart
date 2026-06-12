@@ -75,6 +75,8 @@ class SettingsScreen extends ConsumerWidget {
           if (!Env.skipAuth)
             SwooshCard(
               onTap: () async {
+                final cache = await ref.read(localCacheProvider.future);
+                await cache.clear();
                 await ref.read(supabaseProvider).auth.signOut();
                 ref.read(isUnlockedProvider.notifier).state = false;
                 if (context.mounted) context.go('/login');

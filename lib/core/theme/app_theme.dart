@@ -79,7 +79,6 @@ abstract final class AppTheme {
         contentTextStyle: const TextStyle(color: AppColors.textPrimary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
-        insetPadding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

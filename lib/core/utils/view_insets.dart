@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-abstract final class ViewInsets {
-  static const navigationBarHeight = 72.0;
+abstract final class ViewInsets {  static const navigationBarHeight = 72.0;
 
   static double safeBottom(BuildContext context) {
     final view = View.of(context);
@@ -28,11 +27,6 @@ abstract final class ViewInsets {
   }
 
   static EdgeInsets snackBarMargin(BuildContext context) {
-    return EdgeInsets.fromLTRB(
-      16,
-      16,
-      16,
-      bottomClearance(context),
-    );
+    return EdgeInsets.fromLTRB(16, 16, 16, 16 + safeBottom(context));
   }
 }

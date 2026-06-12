@@ -105,3 +105,15 @@ export async function monzoFetch<T>(path: string, accessToken: string): Promise<
   }
   return data as T;
 }
+
+export async function revokeMonzoToken(accessToken: string) {
+  const response = await fetch('https://api.monzo.com/oauth2/logout', {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!response.ok && response.status !== 404) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.error ?? data?.message ?? 'Failed to revoke Monzo token');
+  }
+}

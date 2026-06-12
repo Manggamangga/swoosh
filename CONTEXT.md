@@ -48,6 +48,10 @@ _Avoid_: Total wealth, portfolio value
 An authorised link between Swoosh and an external financial institution via a provider (Monzo direct API, or Enable Banking Open Banking). At most one Connection exists per provider per user; retrying a failed authorisation reuses it rather than creating another.
 _Avoid_: Link, integration, bank link
 
+**Disconnect**:
+Severing a Connection: the link and its credentials are removed so no further Sync can occur. Accounts and Connections have separate lifecycles — deleting an Account never silently disconnects, and disconnecting is always an explicit user action (offered as a prompt when the last Account fed by a Connection is deleted). On Disconnect the user chooses whether the Accounts it fed are kept as static history or deleted along with it.
+_Avoid_: Unlink, remove bank, delete connection
+
 **Source**:
 How data entered Swoosh: manual entry, CSV import, or openbanking sync.
 _Avoid_: Origin, provider
@@ -56,9 +60,17 @@ _Avoid_: Origin, provider
 Pulling the latest balances and transactions from a Connection into Swoosh. A dashboard sync runs across all Connections at once; previously synced data stays visible while it runs. Sync never changes user-owned data (e.g. account names).
 _Avoid_: Refresh (that's re-reading already-stored data), update
 
+**In-app approval**:
+The consent step in the Monzo app after OAuth completes. The Connection exists and holds tokens, but Sync cannot succeed until the user approves access in Monzo. Swoosh polls automatically during connect and offers a manual retry.
+_Avoid_: Pending connection, OAuth complete
+
 **Dedupe hash**:
 A fingerprint preventing the same transaction from being imported twice.
 _Avoid_: Unique key, fingerprint
+
+**Statement import**:
+Bringing a bank statement file into Swoosh file-first: the bank is inferred from the statement itself, the matching Account is found or created automatically, transactions are imported with dedupe, and the Account's balance is anchored to the statement's running balance when one is present.
+_Avoid_: CSV upload, file import
 
 ### Budgeting & planning
 

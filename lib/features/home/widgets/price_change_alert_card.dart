@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/services/price_change_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/app_snackbar.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/providers/data_providers.dart';
@@ -55,9 +56,7 @@ class PriceChangeAlertCard extends ConsumerWidget {
     ref.invalidate(priceChangeAlertsProvider);
     ref.invalidate(safeToSpendProvider);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Updated ${alert.name}')),
-      );
+      showAppSnackBar(context, 'Updated ${alert.name}');
     }
   }
 }

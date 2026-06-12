@@ -40,10 +40,12 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
       final content = String.fromCharCodes(file.bytes!);
 
       final csvService = ref.read(csvImportServiceProvider);
-      var rows = csvService.parse(
+      final statement = csvService.parseStatement(
         accountId: widget.accountId,
         csvContent: content,
+        fileName: file.name,
       );
+      var rows = statement.rows;
       _rowCount = rows.length;
 
       var categories = await ref.read(categoriesProvider.future);
@@ -73,6 +75,24 @@ class _CsvImportScreenState extends ConsumerState<CsvImportScreen> {
         accountId: widget.accountId,
         rows: rows,
       );
+
+      if (statement.closingBalancePence != null) {
+        final accountRepo = await ref.read(accountRepositoryProvider.future);
+        final latestDate = rows
+            .map((row) => DateTime.tryParse(row['transaction_date'] as String? ?? ''))
+            .whereType<DateTime>()
+            .fold<DateTime?>(
+              null,
+              (latest, date) =>
+                  latest == null || date.isAfter(latest) ? date : latest,
+            );
+        await accountRepo.update(widget.accountId, {
+          'balance_pence': statement.closingBalancePence,
+          'balance_anchor_pence': statement.closingBalancePence,
+          'balance_anchor_date':
+              (latestDate ?? DateTime.now()).toIso8601String().split('T').first,
+        });
+      }
 
       ref.invalidate(transactionsProvider);
       ref.invalidate(allTransactionsProvider);

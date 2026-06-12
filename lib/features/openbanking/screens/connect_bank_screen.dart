@@ -1,13 +1,12 @@
-import 'dart:async';
-
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:swoosh/core/config/env.dart';
+import 'package:swoosh/core/services/connection_account_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/monzo_sync_errors.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
+import 'package:swoosh/features/openbanking/bank_callback_listener.dart';
 import 'package:swoosh/features/openbanking/widgets/bank_auth_webview.dart';
 import 'package:swoosh/models/bank_connection.dart';
 import 'package:swoosh/providers/data_providers.dart';
@@ -18,17 +17,12 @@ const _fallbackInstitutions = [
   'HSBC',
 ];
 
-Uri get _bankCallbackUri =>
-    Uri.parse('${Env.supabaseUrl}/functions/v1/bank-callback');
+Uri get _bankCallbackUri => bankCallbackRelayUri;
 
 String get _bankCallbackRedirect => _bankCallbackUri.toString();
 
-bool _isBankCallback(Uri uri) {
-  if (uri.scheme == 'swoosh' && uri.host == 'bank-callback') return true;
-  return uri.scheme == 'https' &&
-      uri.host == _bankCallbackUri.host &&
-      uri.path == _bankCallbackUri.path;
-}
+const _approvalPollInterval = Duration(seconds: 5);
+const _approvalPollMaxAttempts = 24;
 
 class ConnectBankScreen extends ConsumerStatefulWidget {
   const ConnectBankScreen({super.key});
@@ -38,35 +32,41 @@ class ConnectBankScreen extends ConsumerStatefulWidget {
 }
 
 class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
-  final _appLinks = AppLinks();
-  StreamSubscription<Uri>? _linkSubscription;
-
   bool _loading = false;
   bool _loadingInstitutions = false;
   bool _enableBankingExpanded = false;
   String? _status;
   List<String> _institutions = _fallbackInstitutions;
   String? _syncingConnectionId;
+  bool _awaitingMonzoApproval = false;
+  String? _awaitingApprovalConnectionId;
+  int _approvalPollGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _initDeepLinks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _consumePendingCallback();
+    });
   }
 
   @override
   void dispose() {
-    _linkSubscription?.cancel();
+    _approvalPollGeneration++;
     super.dispose();
   }
 
-  Future<void> _initDeepLinks() async {
-    final initial = await _appLinks.getInitialLink();
-    if (initial != null) {
-      await _handleCallback(initial);
-    }
+  void _stopApprovalPolling() {
+    _approvalPollGeneration++;
+    _awaitingMonzoApproval = false;
+    _awaitingApprovalConnectionId = null;
+  }
 
-    _linkSubscription = _appLinks.uriLinkStream.listen(_handleCallback);
+  Future<void> _consumePendingCallback() async {
+    final uri = ref.read(pendingBankCallbackProvider);
+    if (uri == null || !mounted) return;
+    ref.read(pendingBankCallbackProvider.notifier).state = null;
+    await _processOAuthCallback(uri);
   }
 
   Future<void> _loadEnableBankingInstitutions() async {
@@ -86,11 +86,6 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
       }
     } catch (_) {}
     if (mounted) setState(() => _loadingInstitutions = false);
-  }
-
-  Future<void> _handleCallback(Uri uri) async {
-    if (!_isBankCallback(uri)) return;
-    await _processOAuthCallback(uri);
   }
 
   Future<void> _processOAuthCallback(Uri uri) async {
@@ -120,14 +115,95 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
         redirectUrl: _bankCallbackRedirect,
       );
       final connectionId = result['connection_id'] as String? ?? state;
-      if (result['approve_in_app'] == true) {
-        setState(() => _status = 'Approve access in your Monzo app, then syncing...');
+      final needsInAppApproval = result['approve_in_app'] == true;
+      ref.invalidate(bankConnectionsProvider);
+
+      if (needsInAppApproval) {
+        await _pollUntilApproved(connectionId);
+      } else {
+        await _syncConnection(connectionId, showStatus: false);
+        setState(() => _status = 'Bank connected. Accounts and transactions synced.');
       }
+    } catch (e) {
+      _stopApprovalPolling();
+      setState(() => _status = 'Connection failed: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _pollUntilApproved(String connectionId) async {
+    final generation = ++_approvalPollGeneration;
+
+    setState(() {
+      _awaitingMonzoApproval = true;
+      _awaitingApprovalConnectionId = connectionId;
+      _status = 'Approve access in your Monzo app — checking automatically...';
+    });
+
+    for (var attempt = 0; attempt < _approvalPollMaxAttempts; attempt++) {
+      if (!mounted || generation != _approvalPollGeneration) return;
+
+      if (attempt > 0) {
+        await Future.delayed(_approvalPollInterval);
+        if (!mounted || generation != _approvalPollGeneration) return;
+      }
+
+      try {
+        await _syncConnection(connectionId, showStatus: false);
+        ref.invalidate(bankConnectionsProvider);
+        if (!mounted || generation != _approvalPollGeneration) return;
+        setState(() {
+          _awaitingMonzoApproval = false;
+          _awaitingApprovalConnectionId = null;
+          _status = 'Bank connected. Accounts and transactions synced.';
+        });
+        return;
+      } catch (e) {
+        if (!isMonzoAwaitingApprovalError(e)) {
+          if (!mounted || generation != _approvalPollGeneration) return;
+          setState(() {
+            _awaitingMonzoApproval = false;
+            _awaitingApprovalConnectionId = null;
+            _status = 'Connection failed: $e';
+          });
+          return;
+        }
+      }
+    }
+
+    if (!mounted || generation != _approvalPollGeneration) return;
+    setState(() {
+      _status =
+          'Still waiting for Monzo approval. Open your Monzo app and approve access, then tap "I\'ve approved — sync now".';
+    });
+  }
+
+  Future<void> _syncAfterApproval() async {
+    final connectionId = _awaitingApprovalConnectionId;
+    if (connectionId == null) return;
+
+    _approvalPollGeneration++;
+
+    setState(() {
+      _awaitingMonzoApproval = false;
+      _loading = true;
+      _status = 'Syncing after approval...';
+    });
+
+    try {
       await _syncConnection(connectionId, showStatus: false);
       ref.invalidate(bankConnectionsProvider);
-      setState(() => _status = 'Bank connected. Accounts and transactions synced.');
+      setState(() {
+        _awaitingApprovalConnectionId = null;
+        _status = 'Bank connected. Accounts and transactions synced.';
+      });
     } catch (e) {
-      setState(() => _status = 'Connection failed: $e');
+      if (isMonzoAwaitingApprovalError(e)) {
+        await _pollUntilApproved(connectionId);
+      } else {
+        setState(() => _status = 'Sync failed: $e');
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -173,7 +249,7 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
     if (url == null || url.isEmpty || !mounted) return;
 
     final uri = Uri.tryParse(url);
-    if (uri == null || !_isBankCallback(uri)) {
+    if (uri == null || !isBankCallbackUri(uri)) {
       setState(() => _status = 'That does not look like a bank callback URL.');
       return;
     }
@@ -268,7 +344,13 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
       ref.invalidate(accountsProvider);
       ref.invalidate(transactionsProvider);
     } catch (e) {
-      if (showStatus) setState(() => _status = 'Sync failed: $e');
+      if (showStatus) {
+        setState(() {
+          _status = isMonzoAwaitingApprovalError(e)
+              ? monzoAwaitingApprovalMessage
+              : 'Sync failed: $e';
+        });
+      }
       rethrow;
     } finally {
       if (mounted) setState(() => _syncingConnectionId = null);
@@ -285,8 +367,61 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
   }
 
   String _connectionLabel(BankConnection connection) {
-    if (connection.provider == 'monzo') return 'Monzo';
-    return connection.institutionName ?? 'Bank';
+    return ConnectionAccountService.connectionLabel(connection);
+  }
+
+  Future<void> _disconnect(BankConnection connection) async {
+    final deleteSynced = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Disconnect ${_connectionLabel(connection)}?'),
+        content: const Text(
+          'This removes the bank link and stops future sync. '
+          'Choose whether to keep synced accounts as static history or delete them too.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep accounts'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Delete synced accounts',
+              style: TextStyle(color: AppColors.error.withValues(alpha: 0.9)),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (deleteSynced == null || !mounted) return;
+
+    setState(() {
+      _loading = true;
+      _status = 'Disconnecting ${_connectionLabel(connection)}...';
+    });
+
+    try {
+      final repo = ref.read(bankConnectionRepositoryProvider);
+      await repo.disconnect(
+        connectionId: connection.id,
+        deleteSyncedAccounts: deleteSynced,
+      );
+      ref.invalidate(bankConnectionsProvider);
+      ref.invalidate(accountsProvider);
+      ref.invalidate(transactionsProvider);
+      ref.invalidate(monthlySummaryProvider);
+      setState(() => _status = '${_connectionLabel(connection)} disconnected.');
+    } catch (e) {
+      setState(() => _status = 'Disconnect failed: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -359,6 +494,17 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
                                     )
                                   : const Text('Sync'),
                             ),
+                          TextButton(
+                            onPressed: _loading
+                                ? null
+                                : () => _disconnect(connection),
+                            child: Text(
+                              'Disconnect',
+                              style: TextStyle(
+                                color: AppColors.error.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -498,6 +644,13 @@ class _ConnectBankScreenState extends ConsumerState<ConnectBankScreen> {
           if (_status != null) ...[
             const SizedBox(height: 20),
             Text(_status!, style: const TextStyle(fontSize: 13)),
+          ],
+          if (_awaitingMonzoApproval) ...[
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _syncingConnectionId != null ? null : _syncAfterApproval,
+              child: const Text("I've approved — sync now"),
+            ),
           ],
           if (_loading)
             const Padding(

@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/sheet_navigation.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/providers/data_providers.dart';
 
-Future<void> showCsvAccountPicker(BuildContext context, WidgetRef ref) {
+Future<void> showCsvAccountPicker({
+  required BuildContext context,
+  required GoRouter router,
+  required WidgetRef ref,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -58,7 +63,10 @@ Future<void> showCsvAccountPicker(BuildContext context, WidgetRef ref) {
                       SwooshCard(
                         onTap: () {
                           Navigator.pop(context);
-                          context.push('/accounts/${account.id}/import');
+                          pushAfterSheetDismiss(
+                            router,
+                            '/accounts/${account.id}/import',
+                          );
                         },
                         child: Row(
                           children: [
@@ -95,7 +103,7 @@ Future<void> showCsvAccountPicker(BuildContext context, WidgetRef ref) {
                     SwooshCard(
                       onTap: () {
                         Navigator.pop(context);
-                        context.push('/accounts/add?continueImport=1');
+                        pushAfterSheetDismiss(router, '/accounts/add?continueImport=1');
                       },
                       child: const Row(
                         children: [

@@ -55,6 +55,12 @@ class AccountRepository {
   }
 
   Future<void> delete(String id) async {
+    await _client.from('account_balance_snapshots').delete().eq('account_id', id);
+    await _client.from('goals').update({'account_id': null}).eq('account_id', id);
+    await _client
+        .from('recurring_payments')
+        .update({'account_id': null})
+        .eq('account_id', id);
     await _client.from('transactions').delete().eq('account_id', id);
     await _client.from('accounts').delete().eq('id', id);
   }

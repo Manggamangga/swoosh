@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:swoosh/core/utils/app_snackbar.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/providers/data_providers.dart';
@@ -65,9 +66,7 @@ class _AddAccountScreenState extends ConsumerState<AddAccountScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
-        );
+        showAppSnackBar(context, 'Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _loading = false);

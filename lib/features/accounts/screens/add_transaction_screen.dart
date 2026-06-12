@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:swoosh/core/utils/app_snackbar.dart';
 import 'package:swoosh/core/utils/dedupe.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/features/accounts/screens/account_detail_screen.dart';
@@ -76,9 +77,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e')),
-        );
+        showAppSnackBar(context, 'Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _loading = false);

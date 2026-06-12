@@ -49,6 +49,7 @@ class AccountsScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(accountsProvider),
         child: accountsAsync.when(
+          skipLoadingOnReload: true,
           loading: () => ListView(
             padding: ViewInsets.listPadding(context, includeFab: true),
             children: const [SkeletonCard(), SizedBox(height: 16), SkeletonCard()],

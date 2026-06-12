@@ -50,9 +50,11 @@ class PlanningScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             accountsAsync.when(
+              skipLoadingOnReload: true,
               loading: () => const SkeletonCard(),
               error: (error, _) => ErrorState(message: error.toString()),
               data: (accounts) => recurringAsync.when(
+                skipLoadingOnReload: true,
                 loading: () => const SkeletonCard(),
                 error: (error, _) => ErrorState(message: error.toString()),
                 data: (recurring) {
@@ -85,6 +87,7 @@ class PlanningScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             goalsAsync.when(
+              skipLoadingOnReload: true,
               loading: () => const SkeletonCard(),
               error: (error, _) => ErrorState(message: error.toString()),
               data: (goals) {

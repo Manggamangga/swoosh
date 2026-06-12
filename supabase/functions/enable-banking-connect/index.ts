@@ -64,48 +64,25 @@ Deno.serve(async (req) => {
       }
 
       const validUntil = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: existing } = await supabase
+      const { data: connection, error: upsertError } = await supabase
         .from('bank_connections')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('provider', 'enable_banking')
-        .maybeSingle();
-
-      let connection;
-      if (existing) {
-        const { data, error: updateError } = await supabase
-          .from('bank_connections')
-          .update({
-            institution_id: institutionName,
-            institution_name: institutionName,
-            status: 'pending',
-            expires_at: validUntil,
-            requisition_id: null,
-          })
-          .eq('id', existing.id)
-          .select()
-          .single();
-        if (updateError || !data) {
-          return jsonResponse({ error: updateError?.message ?? 'Failed to reset connection' }, 500);
-        }
-        connection = data;
-      } else {
-        const { data, error: insertError } = await supabase
-          .from('bank_connections')
-          .insert({
+        .upsert(
+          {
             user_id: user.id,
             provider: 'enable_banking',
             institution_id: institutionName,
             institution_name: institutionName,
             status: 'pending',
             expires_at: validUntil,
-          })
-          .select()
-          .single();
-        if (insertError || !data) {
-          return jsonResponse({ error: insertError?.message ?? 'Failed to create connection' }, 500);
-        }
-        connection = data;
+            requisition_id: null,
+          },
+          { onConflict: 'user_id,provider' },
+        )
+        .select()
+        .single();
+
+      if (upsertError || !connection) {
+        return jsonResponse({ error: upsertError?.message ?? 'Failed to create connection' }, 500);
       }
 
       const authData = await enableBankingFetch<StartAuthResponse>('/auth', 'POST', {

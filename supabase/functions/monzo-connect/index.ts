@@ -43,18 +43,12 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: 'redirect_url is required' }, 400);
       }
 
-      const { data: existing } = await supabase
+      const { data: connection, error: upsertError } = await supabase
         .from('bank_connections')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('provider', 'monzo')
-        .maybeSingle();
-
-      let connection;
-      if (existing) {
-        const { data, error: updateError } = await supabase
-          .from('bank_connections')
-          .update({
+        .upsert(
+          {
+            user_id: user.id,
+            provider: 'monzo',
             institution_id: 'monzo',
             institution_name: 'Monzo',
             status: 'pending',
@@ -62,30 +56,14 @@ Deno.serve(async (req) => {
             refresh_token: null,
             token_expires_at: null,
             requisition_id: null,
-          })
-          .eq('id', existing.id)
-          .select()
-          .single();
-        if (updateError || !data) {
-          return jsonResponse({ error: updateError?.message ?? 'Failed to reset connection' }, 500);
-        }
-        connection = data;
-      } else {
-        const { data, error: insertError } = await supabase
-          .from('bank_connections')
-          .insert({
-            user_id: user.id,
-            provider: 'monzo',
-            institution_id: 'monzo',
-            institution_name: 'Monzo',
-            status: 'pending',
-          })
-          .select()
-          .single();
-        if (insertError || !data) {
-          return jsonResponse({ error: insertError?.message ?? 'Failed to create connection' }, 500);
-        }
-        connection = data;
+          },
+          { onConflict: 'user_id,provider' },
+        )
+        .select()
+        .single();
+
+      if (upsertError || !connection) {
+        return jsonResponse({ error: upsertError?.message ?? 'Failed to create connection' }, 500);
       }
 
       const url = buildMonzoAuthUrl(config.clientId, redirectUrl, connection.id);

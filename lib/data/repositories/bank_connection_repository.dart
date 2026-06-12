@@ -105,6 +105,20 @@ class BankConnectionRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> disconnect({
+    required String connectionId,
+    required bool deleteSyncedAccounts,
+  }) async {
+    final response = await _client.functions.invoke(
+      'bank-disconnect',
+      body: {
+        'connection_id': connectionId,
+        'delete_synced_accounts': deleteSyncedAccounts,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<String> _providerForConnection(String connectionId) async {
     final result = await _client
         .from('bank_connections')
