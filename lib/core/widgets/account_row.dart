@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/spacing.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/models/account.dart';
 
@@ -9,11 +10,18 @@ class AccountRow extends StatelessWidget {
     required this.account,
     this.onTap,
     this.heroTag,
+    this.showDivider = false,
   });
 
   final Account account;
   final VoidCallback? onTap;
   final String? heroTag;
+  final bool showDivider;
+
+  int get _displayBalancePence => switch (account.accountType) {
+        AccountType.credit => -account.balancePence.abs(),
+        _ => account.balancePence,
+      };
 
   Color get _accent {
     switch (account.accountType) {
@@ -21,14 +29,16 @@ class AccountRow extends StatelessWidget {
         return AppColors.everyday;
       case AccountType.savings:
         return AppColors.savings;
+      case AccountType.credit:
+        return AppColors.credit;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final icon = Container(
-      width: 44,
-      height: 44,
+      width: AppSpacing.iconSize,
+      height: AppSpacing.iconSize,
       decoration: BoxDecoration(
         color: _accent.withValues(alpha: 0.15),
         shape: BoxShape.circle,
@@ -36,61 +46,68 @@ class AccountRow extends StatelessWidget {
       child: Icon(Icons.account_balance, color: _accent, size: 22),
     );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-          child: Row(
-            children: [
-              heroTag != null
-                  ? Hero(tag: heroTag!, child: icon)
-                  : icon,
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
-                    ),
-                    if (account.institution != null)
-                      Text(
-                        account.institution!,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
+    return Column(
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.listItemVertical,
+                horizontal: AppSpacing.xs,
+              ),
+              child: Row(
+                children: [
+                  heroTag != null
+                      ? Hero(tag: heroTag!, child: icon)
+                      : icon,
+                  const SizedBox(width: AppSpacing.iconGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          account.name,
+                          style: AppTextStyles.tileTitle(context),
                         ),
-                      ),
+                        if (account.institution != null)
+                          Text(
+                            account.institution!,
+                            style: AppTextStyles.tileSubtitle(context),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    Money.format(
+                      _displayBalancePence,
+                      currency: account.currency,
+                    ),
+                    style: AppTextStyles.tileTitle(context).copyWith(color: _accent),
+                  ),
+                  if (onTap != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
                   ],
-                ),
+                ],
               ),
-              Text(
-                Money.format(account.balancePence, currency: account.currency),
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: _accent,
-                ),
-              ),
-              if (onTap != null) ...[
-                const SizedBox(width: 8),
-                const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.textMuted,
-                  size: 20,
-                ),
-              ],
-            ],
+            ),
           ),
         ),
-      ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.border.withValues(alpha: 0.6),
+          ),
+      ],
     );
   }
 }

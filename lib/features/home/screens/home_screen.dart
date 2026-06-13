@@ -1,157 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/spacing.dart';
 import 'package:swoosh/core/utils/app_snackbar.dart';
+import 'package:swoosh/core/utils/haptics.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/account_row.dart';
+import 'package:swoosh/core/widgets/animated_balance_text.dart';
+import 'package:swoosh/core/widgets/category_icon.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/frosted_sliver_app_bar.dart';
-import 'package:swoosh/core/widgets/period_pills.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/core/widgets/transaction_tile.dart';
-import 'package:swoosh/features/accounts/widgets/add_account_chooser.dart';
-import 'package:swoosh/features/home/home_balance_view.dart';
-import 'package:swoosh/features/home/widgets/balance_chart.dart';
-import 'package:swoosh/core/widgets/animated_balance_text.dart';
-import 'package:swoosh/features/home/widgets/price_change_alert_card.dart';
-import 'package:swoosh/features/home/widgets/safe_to_spend_card.dart';
-import 'package:swoosh/core/widgets/swoosh_chip.dart';
-import 'package:swoosh/features/home/widgets/upcoming_bills_card.dart';
+import 'package:swoosh/features/accounts/widgets/import_statement_sheet.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/recurring_payment.dart';
 import 'package:swoosh/models/transaction.dart';
 import 'package:swoosh/providers/data_providers.dart';
-import 'package:swoosh/providers/providers.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  ChartPeriod _period = ChartPeriod.threeMonths;
-  HomeBalanceView _view = HomeBalanceView.everyday;
-  bool _isSyncing = false;
-
-  Future<void> _syncAll() async {
-    if (_isSyncing) return;
-
-    HapticFeedback.lightImpact();
-    setState(() => _isSyncing = true);
-
-    try {
-      final connections = await ref.read(bankConnectionsProvider.future);
-      var totalAccounts = 0;
-      var totalTransactions = 0;
-      final errors = <String>[];
-
-      if (connections.isEmpty) {
-        ref.invalidate(accountsProvider);
-        ref.invalidate(transactionsProvider);
-        ref.invalidate(monthlySummaryProvider);
-        if (mounted) {
-          showAppSnackBar(context, 'Refreshed');
-        }
-        return;
-      }
-
-      final repo = ref.read(bankConnectionRepositoryProvider);
-      final results = await Future.wait(
-        connections.map((connection) async {
-          try {
-            return await repo.syncConnection(connection.id);
-          } catch (error) {
-            return {'error': error.toString()};
-          }
-        }),
-      );
-
-      for (final result in results) {
-        if (result.containsKey('error')) {
-          errors.add(result['error'] as String);
-          continue;
-        }
-        totalAccounts += (result['accounts_synced'] as num?)?.toInt() ?? 0;
-        totalTransactions +=
-            (result['transactions_synced'] as num?)?.toInt() ?? 0;
-      }
-
-      ref.invalidate(accountsProvider);
-      ref.invalidate(transactionsProvider);
-      ref.invalidate(monthlySummaryProvider);
-      ref.invalidate(bankConnectionsProvider);
-      ref.invalidate(chartTransactionsProvider(_period));
-      ref.invalidate(upcomingRecurringProvider);
-      ref.invalidate(recurringProvider);
-      ref.invalidate(safeToSpendProvider);
-      ref.invalidate(priceChangeAlertsProvider);
-      ref.invalidate(balanceHistoryProvider((_period, _view)));
-
-      if (!mounted) return;
-
-      if (errors.isNotEmpty && totalAccounts == 0 && totalTransactions == 0) {
-        showAppSnackBar(context, 'Sync failed: ${errors.first}');
-      } else {
-        final message = errors.isEmpty
-            ? 'Synced $totalAccounts account(s), $totalTransactions transaction(s)'
-            : 'Synced $totalAccounts account(s), $totalTransactions transaction(s). '
-                '${errors.length} connection(s) failed.';
-        showAppSnackBar(context, message);
-      }
-    } finally {
-      if (mounted) setState(() => _isSyncing = false);
+  Future<void> _refresh(WidgetRef ref, BuildContext context) async {
+    AppHaptics.light();
+    ref.invalidate(accountsProvider);
+    ref.invalidate(netWorthProvider);
+    ref.invalidate(monthlySummaryProvider);
+    ref.invalidate(topSpendingCategoriesProvider);
+    ref.invalidate(transactionsProvider);
+    ref.invalidate(recurringProvider);
+    ref.invalidate(upcomingRecurringProvider);
+    if (context.mounted) {
+      showAppSnackBar(context, 'Refreshed');
     }
   }
 
-  List<Account> _accountsForView(List<Account> accounts) {
-    return accountsForView(accounts, _view);
-  }
-
-  int _monthRecurringTotal(List<RecurringPayment> payments) {
-    final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1);
-    final monthEnd = DateTime(now.year, now.month + 1, 0);
-    return payments
-        .where(
-          (payment) =>
-              !payment.nextDate.isBefore(monthStart) &&
-              !payment.nextDate.isAfter(monthEnd),
-        )
-        .fold<int>(0, (sum, payment) => sum + payment.amountPence);
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountsProvider);
-    final transactionsAsync = ref.watch(transactionsProvider);
-    final chartTransactionsAsync = ref.watch(chartTransactionsProvider(_period));
-    final balanceHistoryAsync = ref.watch(balanceHistoryProvider((_period, _view)));
-    final safeToSpendAsync = ref.watch(safeToSpendProvider);
-    final priceAlertsAsync = ref.watch(priceChangeAlertsProvider);
+    final netWorthAsync = ref.watch(netWorthProvider);
     final summaryAsync = ref.watch(monthlySummaryProvider);
-    final upcomingAsync = ref.watch(upcomingRecurringProvider);
+    final topCategoriesAsync = ref.watch(topSpendingCategoriesProvider);
+    final transactionsAsync = ref.watch(transactionsProvider);
     final recurringAsync = ref.watch(recurringProvider);
     final bottomPadding = ViewInsets.bottomClearance(context);
 
-    final accounts = accountsAsync.valueOrNull;
-    final chartLoading =
-        chartTransactionsAsync.isLoading && chartTransactionsAsync.valueOrNull == null;
-    final transactions = transactionsAsync.valueOrNull;
-    final summary = summaryAsync.valueOrNull;
-    final upcoming = upcomingAsync.valueOrNull ?? const [];
-    final recurring = recurringAsync.valueOrNull ?? const [];
-
     return Scaffold(
       body: RefreshIndicator(
-        onRefresh: _syncAll,
+        onRefresh: () => _refresh(ref, context),
         child: CustomScrollView(
           slivers: [
             FrostedSliverAppBar(
@@ -162,144 +62,92 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: const Icon(Icons.settings_outlined),
                 ),
                 IconButton(
-                  onPressed: _isSyncing ? null : _syncAll,
-                  icon: _isSyncing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.sync),
+                  onPressed: () => _refresh(ref, context),
+                  icon: const Icon(Icons.sync),
                 ),
               ],
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.lg,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
               sliver: SliverToBoxAdapter(
-                child: _TypeTabs(
-                  selected: _view,
-                  onChanged: (view) => setState(() => _view = view),
-                ),
+                child: _NetWorthHero(netWorthAsync: netWorthAsync),
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.sectionGap,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
               sliver: SliverToBoxAdapter(
-                child: _buildBalanceCard(
-                  context,
-                  accounts: accounts,
-                  accountsLoading: accounts == null && accountsAsync.isLoading,
-                  balanceHistoryAsync: balanceHistoryAsync,
-                  chartLoading: chartLoading,
-                ),
+                child: _AccountsSection(accountsAsync: accountsAsync),
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.sectionGap,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
               sliver: SliverToBoxAdapter(
-                child: safeToSpendAsync.when(
+                child: summaryAsync.when(
                   skipLoadingOnReload: true,
-                  loading: () => const SkeletonCard(),
+                  loading: () => const SkeletonCard(height: 88),
                   error: (_, __) => const SizedBox.shrink(),
-                  data: (result) => SafeToSpendCard(result: result),
+                  data: (summary) => _MonthlySummaryCard(summary: summary),
                 ),
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.sectionGap,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
               sliver: SliverToBoxAdapter(
-                child: priceAlertsAsync.when(
+                child: _TopCategoriesSection(
+                  categoriesAsync: topCategoriesAsync,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.sectionGap,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _RecentTransactionsSection(
+                  transactionsAsync: transactionsAsync,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pageHorizontal,
+                AppSpacing.sectionGap,
+                AppSpacing.pageHorizontal,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: recurringAsync.when(
                   skipLoadingOnReload: true,
-                  loading: () => const SizedBox.shrink(),
+                  loading: () => const SkeletonCard(height: 100),
                   error: (_, __) => const SizedBox.shrink(),
-                  data: (alerts) {
-                    if (alerts.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      children: alerts
-                          .map((alert) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: PriceChangeAlertCard(alert: alert),
-                              ))
-                          .toList(),
-                    );
-                  },
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: summary == null && summaryAsync.isLoading
-                    ? const SkeletonCard()
-                    : summary == null
-                        ? const SizedBox.shrink()
-                        : SwooshCard(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _SummaryColumn(
-                                    label: 'Income',
-                                    amount: summary.incomePence,
-                                    color: AppColors.income,
-                                  ),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 48,
-                                  color: AppColors.border,
-                                ),
-                                Expanded(
-                                  child: _SummaryColumn(
-                                    label: 'Spending',
-                                    amount: summary.spendingPence,
-                                    color: AppColors.spending,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-              ),
-            ),
-            if (upcoming.isNotEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                sliver: SliverToBoxAdapter(
-                  child: UpcomingBillsCard(
-                    payments: upcoming,
-                    monthTotalPence: _monthRecurringTotal(recurring),
+                  data: (recurring) => _RecurringTeaser(
+                    recurring: recurring,
+                    onTap: () => context.push('/insights'),
                   ),
                 ),
-              ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Transactions',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                    TextButton(
-                      onPressed: () => context.push('/transactions'),
-                      child: const Text('See all'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: _buildTransactionsPreview(context, transactions, transactionsAsync),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              sliver: SliverToBoxAdapter(
-                child: _buildAccountsSection(context, accounts),
               ),
             ),
             SliverPadding(
@@ -311,227 +159,157 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildBalanceCard(
-    BuildContext context, {
-    required List<Account>? accounts,
-    required bool accountsLoading,
-    required AsyncValue<List<BalancePoint>> balanceHistoryAsync,
-    required bool chartLoading,
-  }) {
-    if (accountsLoading && accounts == null) {
-      return const SkeletonCard();
-    }
+class _NetWorthHero extends StatelessWidget {
+  const _NetWorthHero({required this.netWorthAsync});
 
-    if (accounts == null) {
-      return const SizedBox.shrink();
-    }
+  final AsyncValue<int> netWorthAsync;
 
-    final filtered = _accountsForView(accounts);
-    final total = filtered.fold<int>(0, (sum, account) => sum + account.balancePence);
-    final now = DateTime.now();
-
-    return SwooshCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            labelForHomeBalanceView(_view),
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 8),
-          AnimatedBalanceText(
-            formattedAmount: Money.format(total),
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            DateFormat('EEE, d MMMM').format(now),
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 20),
-          balanceHistoryAsync.when(
-            skipLoadingOnReload: true,
-            loading: () => chartLoading
-                ? const SkeletonLoader(height: 180)
-                : const SkeletonLoader(height: 180),
-            error: (_, __) => const SizedBox(
-              height: 180,
-              child: Center(
-                child: Text(
-                  'Could not load chart',
-                  style: TextStyle(color: AppColors.textMuted),
-                ),
-              ),
-            ),
-            data: (balanceHistory) {
-              if (chartLoading && balanceHistory.isEmpty) {
-                return const SkeletonLoader(height: 180);
-              }
-              return RepaintBoundary(
-                child: BalanceChart(points: balanceHistory),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          PeriodPills(
-            selected: _period,
-            onChanged: (period) => setState(() => _period = period),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionsPreview(
-    BuildContext context,
-    List<Transaction>? transactions,
-    AsyncValue<List<Transaction>> transactionsAsync,
-  ) {
-    if (transactions == null && transactionsAsync.isLoading) {
-      return const SkeletonCard();
-    }
-
-    if (transactions == null || transactions.isEmpty) {
-      return EmptyState(
-        icon: Icons.receipt_long_outlined,
-        title: 'No transactions yet',
-        subtitle: 'Add an account and import or log transactions',
-        action: ElevatedButton(
-          onPressed: () => showAddAccountChooser(context, ref),
-          child: const Text('Add account'),
+  @override
+  Widget build(BuildContext context) {
+    return netWorthAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const SkeletonCard(height: 120),
+      error: (_, __) => SwooshCard(
+        child: Text(
+          'Could not load net worth',
+          style: AppTextStyles.bodyMuted(context),
         ),
-      );
-    }
-
-    final preview = transactions.take(5).toList();
-    return SwooshCard(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Column(
-        children: preview
-            .map((transaction) => TransactionTile(transaction: transaction))
-            .toList(),
       ),
-    );
-  }
-
-  Widget _buildAccountsSection(BuildContext context, List<Account>? accounts) {
-    if (accounts == null || accounts.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    if (_view == HomeBalanceView.netWorth) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final type in AccountType.values) ...[
-            if (accounts.any((account) => account.accountType == type)) ...[
-              Text(
-                type.name[0].toUpperCase() + type.name.substring(1),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              SwooshCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Column(
-                  children: accounts
-                      .where((account) => account.accountType == type)
-                      .map(
-                        (account) => AccountRow(
-                          account: account,
-                          heroTag: 'account-${account.id}',
-                          onTap: () => context.push('/accounts/${account.id}'),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ],
-        ],
-      );
-    }
-
-    final filtered = _accountsForView(accounts);
-    if (filtered.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Accounts',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-        const SizedBox(height: 12),
-        SwooshCard(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      data: (netWorth) {
+        final now = DateTime.now();
+        return SwooshCard(
           child: Column(
-            children: filtered
-                .map(
-                  (account) => AccountRow(
-                    account: account,
-                    heroTag: 'account-${account.id}',
-                    onTap: () => context.push('/accounts/${account.id}'),
-                  ),
-                )
-                .toList(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Net worth', style: AppTextStyles.label(context)),
+              const SizedBox(height: AppSpacing.sm),
+              AnimatedBalanceText(
+                formattedAmount: Money.format(netWorth),
+                style: AppTextStyles.headlineBalance(context),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                DateFormat('EEE, d MMMM').format(now),
+                style: AppTextStyles.captionMuted(context),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class _TypeTabs extends StatelessWidget {
-  const _TypeTabs({
-    required this.selected,
-    required this.onChanged,
+class _AccountsSection extends ConsumerWidget {
+  const _AccountsSection({
+    required this.accountsAsync,
   });
 
-  final HomeBalanceView selected;
-  final ValueChanged<HomeBalanceView> onChanged;
+  final AsyncValue<List<Account>> accountsAsync;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return accountsAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const SkeletonAccountList(itemCount: 4),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (accounts) {
+        if (accounts.isEmpty) {
+          return EmptyState(
+            icon: Icons.account_balance_outlined,
+            title: 'No accounts yet',
+            subtitle: 'Import a statement to see your net worth',
+            actionLabel: 'Import statement',
+            onAction: () => showImportStatementSheet(context, ref),
+            compact: true,
+          );
+        }
+
+        final sorted = [...accounts]..sort(
+            (a, b) => a.accountType.index.compareTo(b.accountType.index),
+          );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Accounts', style: AppTextStyles.sectionTitle(context)),
+            const SizedBox(height: AppSpacing.md),
+            SwooshCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.xs,
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < sorted.length; i++)
+                    AccountRow(
+                      account: sorted[i],
+                      heroTag: 'account-${sorted[i].id}',
+                      onTap: () => context.push('/accounts/${sorted[i].id}'),
+                      showDivider: i < sorted.length - 1,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MonthlySummaryCard extends StatelessWidget {
+  const _MonthlySummaryCard({required this.summary});
+
+  final MonthlySummary summary;
 
   @override
   Widget build(BuildContext context) {
-    final chips = [
-      HomeBalanceView.everyday,
-      HomeBalanceView.savings,
-      HomeBalanceView.netWorth,
-    ];
+    final monthLabel = DateFormat('MMMM').format(DateTime.now());
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: chips.map((view) {
-          final isSelected = view == selected;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: SwooshChip(
-              label: _label(view),
-              selected: isSelected,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                onChanged(view);
-              },
-            ),
-          );
-        }).toList(),
+    return SwooshCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'This month',
+            style: AppTextStyles.sectionTitle(context),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            monthLabel,
+            style: AppTextStyles.captionMuted(context),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryColumn(
+                  label: 'Income',
+                  amount: summary.incomePence,
+                  color: AppColors.income,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 48,
+                color: AppColors.border,
+              ),
+              Expanded(
+                child: _SummaryColumn(
+                  label: 'Spending',
+                  amount: summary.spendingPence,
+                  color: AppColors.spending,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
-
-  String _label(HomeBalanceView view) => labelForHomeBalanceView(view);
 }
 
 class _SummaryColumn extends StatelessWidget {
@@ -549,20 +327,235 @@ class _SummaryColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-        ),
-        const SizedBox(height: 4),
+        Text(label, style: AppTextStyles.label(context)),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           Money.format(amount),
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-            color: color,
-          ),
+          style: AppTextStyles.amount(context, color: color),
         ),
       ],
+    );
+  }
+}
+
+class _RecentTransactionsSection extends StatelessWidget {
+  const _RecentTransactionsSection({required this.transactionsAsync});
+
+  final AsyncValue<List<Transaction>> transactionsAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return transactionsAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const SkeletonTransactionList(itemCount: 3),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (transactions) {
+        if (transactions.isEmpty) return const SizedBox.shrink();
+
+        final preview = transactions.take(5).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent transactions',
+                  style: AppTextStyles.sectionTitle(context),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/transactions'),
+                  child: const Text('See all'),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SwooshCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.cardPadding,
+                vertical: AppSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < preview.length; i++)
+                    InkWell(
+                      onTap: () => context.push('/transactions'),
+                      child: TransactionTile(
+                        transaction: preview[i],
+                        showDivider: i < preview.length - 1,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _TopCategoriesSection extends StatelessWidget {
+  const _TopCategoriesSection({required this.categoriesAsync});
+
+  final AsyncValue<List<CategorySpendingRow>> categoriesAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return categoriesAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => const SkeletonTransactionList(itemCount: 3),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (categories) {
+        if (categories.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Top spending',
+                  style: AppTextStyles.sectionTitle(context),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/spending'),
+                  child: const Text('See all'),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SwooshCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.cardPadding,
+                vertical: AppSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  for (var i = 0; i < categories.length; i++)
+                    _CategoryPreviewRow(
+                      row: categories[i],
+                      showDivider: i < categories.length - 1,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CategoryPreviewRow extends StatelessWidget {
+  const _CategoryPreviewRow({
+    required this.row,
+    required this.showDivider,
+  });
+
+  final CategorySpendingRow row;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.listItemVertical),
+          child: Row(
+            children: [
+              CategoryIcon(
+                iconName: row.categoryIcon,
+                color: row.categoryColor,
+                size: 36,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  row.categoryName,
+                  style: AppTextStyles.tileTitle(context),
+                ),
+              ),
+              Text(
+                Money.format(row.spentPence),
+                style: AppTextStyles.tileTitle(context),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.border.withValues(alpha: 0.6),
+          ),
+      ],
+    );
+  }
+}
+
+class _RecurringTeaser extends StatelessWidget {
+  const _RecurringTeaser({
+    required this.recurring,
+    required this.onTap,
+  });
+
+  final List<RecurringPayment> recurring;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (recurring.isEmpty) return const SizedBox.shrink();
+
+    final monthlyTotal = recurring
+        .where((payment) => payment.amountPence < 0)
+        .fold<int>(0, (sum, payment) => sum + payment.amountPence.abs());
+
+    return SwooshCard(
+      onTap: () {
+        AppHaptics.light();
+        onTap();
+      },
+      child: Row(
+        children: [
+          Container(
+            width: AppSpacing.iconSize,
+            height: AppSpacing.iconSize,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.autorenew,
+              color: AppColors.primary,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.iconGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recurring payments',
+                  style: AppTextStyles.tileTitle(context),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${recurring.length} tracked · ${Money.format(monthlyTotal)}/mo',
+                  style: AppTextStyles.tileSubtitle(context),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.textMuted,
+            size: 20,
+          ),
+        ],
+      ),
     );
   }
 }

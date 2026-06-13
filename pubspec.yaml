@@ -1,7 +1,7 @@
 name: swoosh
 description: Personal finance tracker for accounts, budgets, and planning.
 publish_to: 'none'
-version: 1.4.0+5
+version: 1.5.0+6
 
 environment:
   sdk: ^3.9.2
@@ -18,16 +18,15 @@ dependencies:
   local_auth: ^2.3.0
   csv: ^6.0.0
   file_picker: ^8.3.7
+  syncfusion_flutter_pdf: ^28.2.12
   shared_preferences: ^2.5.3
   intl: ^0.20.2
   uuid: ^4.5.1
   crypto: ^3.0.6
   equatable: ^2.0.7
   url_launcher: ^6.3.1
-  app_links: ^6.4.0
   flutter_native_splash: ^2.4.5
   flutter_launcher_icons: ^0.14.3
-  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

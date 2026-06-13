@@ -46,21 +46,19 @@ class BalanceHistoryService {
         DateTime(point.date.year, point.date.month, point.date.day): point.balancePence,
     };
 
-    final manualAccounts =
-        accounts.where((a) => a.source != DataSource.openbanking).toList();
-    final manualAccountIds = manualAccounts.map((a) => a.id).toSet();
+    final accountIds = accounts.map((a) => a.id).toSet();
 
     final points = <BalancePoint>[];
     var cursor = DateTime(end.year, end.month, end.day);
     final startDay = DateTime(start.year, start.month, start.day);
 
-    var manualRunning = manualAccounts.fold<int>(
+    var manualRunning = accounts.fold<int>(
       0,
       (sum, account) => sum + account.balancePence,
     );
 
     final relevant = transactions
-        .where((t) => manualAccountIds.contains(t.accountId))
+        .where((t) => accountIds.contains(t.accountId))
         .where(
           (t) =>
               !t.transactionDate.isBefore(start) &&

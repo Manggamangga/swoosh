@@ -2,50 +2,71 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/features/accounts/screens/account_detail_screen.dart';
 import 'package:swoosh/features/accounts/screens/accounts_screen.dart';
-import 'package:swoosh/features/accounts/screens/add_account_screen.dart';
-import 'package:swoosh/features/accounts/screens/add_transaction_screen.dart';
-import 'package:swoosh/features/accounts/screens/csv_import_screen.dart';
 import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/features/auth/screens/login_screen.dart';
 import 'package:swoosh/features/auth/screens/unlock_screen.dart';
+import 'package:swoosh/features/onboarding/screens/welcome_screen.dart';
 import 'package:swoosh/features/spending/screens/spending_screen.dart';
 import 'package:swoosh/features/home/screens/home_screen.dart';
-import 'package:swoosh/features/openbanking/screens/connect_bank_screen.dart';
-import 'package:swoosh/features/planning/screens/planning_screen.dart';
-import 'package:swoosh/features/recurring/screens/recurring_screen.dart';
+import 'package:swoosh/features/insights/screens/insights_screen.dart';
 import 'package:swoosh/features/shell/app_shell.dart';
 import 'package:swoosh/features/settings/screens/settings_screen.dart';
 import 'package:swoosh/features/transactions/screens/transactions_screen.dart';
+import 'package:swoosh/providers/data_providers.dart';
+import 'package:swoosh/providers/onboarding_provider.dart';
 import 'package:swoosh/providers/providers.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
   final isUnlocked = ref.watch(isUnlockedProvider);
+  final accountsAsync = ref.watch(accountsProvider);
+  final onboardingCompleted = ref.watch(onboardingCompletedProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      if (Env.skipAuth) return null;
+      if (Env.skipAuth) {
+        final accounts = accountsAsync.valueOrNull;
+        final onWelcome = state.matchedLocation == '/welcome';
+        if (accounts != null &&
+            accounts.isEmpty &&
+            !onboardingCompleted &&
+            !onWelcome) {
+          return '/welcome';
+        }
+        if (onboardingCompleted && onWelcome) return '/';
+        return null;
+      }
 
       final session = authState.valueOrNull?.session;
       final isLoggingIn = state.matchedLocation == '/login';
       final isUnlocking = state.matchedLocation == '/unlock';
+      final onWelcome = state.matchedLocation == '/welcome';
 
       if (session == null) return isLoggingIn ? null : '/login';
       if (!isUnlocked && !isUnlocking) return '/unlock';
       if (isUnlocked && (isLoggingIn || isUnlocking)) return '/';
+
+      final accounts = accountsAsync.valueOrNull;
+      if (accounts != null &&
+          accounts.isEmpty &&
+          !onboardingCompleted &&
+          !onWelcome &&
+          !isLoggingIn &&
+          !isUnlocking) {
+        return '/welcome';
+      }
+      if (onboardingCompleted && onWelcome) return '/';
+
       return null;
     },
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/unlock', builder: (_, __) => const UnlockScreen()),
+      GoRoute(path: '/welcome', builder: (_, __) => const WelcomeScreen()),
       GoRoute(
         path: '/budgets',
         redirect: (_, __) => '/spending',
-      ),
-      GoRoute(
-        path: '/recurring',
-        redirect: (_, __) => '/planning/recurring',
       ),
       StatefulShellRoute(
         builder: (_, __, navigationShell) {
@@ -85,48 +106,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/planning',
-                builder: (_, __) => const PlanningScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'recurring',
-                    builder: (_, __) => const RecurringScreen(),
-                  ),
-                ],
+                path: '/insights',
+                builder: (_, __) => const InsightsScreen(),
               ),
             ],
           ),
         ],
       ),
       GoRoute(
-        path: '/accounts/add',
-        builder: (_, state) => AddAccountScreen(
-          continueImport: state.uri.queryParameters['continueImport'] == '1',
-        ),
-      ),
-      GoRoute(
         path: '/accounts/:id',
         builder: (_, state) => AccountDetailScreen(
           accountId: state.pathParameters['id']!,
         ),
-        routes: [
-          GoRoute(
-            path: 'add-tx',
-            builder: (_, state) => AddTransactionScreen(
-              accountId: state.pathParameters['id']!,
-            ),
-          ),
-          GoRoute(
-            path: 'import',
-            builder: (_, state) => CsvImportScreen(
-              accountId: state.pathParameters['id']!,
-            ),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/connect-bank',
-        builder: (_, __) => const ConnectBankScreen(),
       ),
       GoRoute(
         path: '/settings',
@@ -136,6 +127,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/transactions',
         builder: (_, state) => TransactionsScreen(
           initialCategoryId: state.uri.queryParameters['category'],
+          initialAccountId: state.uri.queryParameters['account'],
         ),
       ),
     ],

@@ -20,7 +20,7 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java": {
-    "mtime": 1781044573.2426922,
+    "mtime": 1781362005.669883,
     "ast_hash": "6c71184b0db327a26e1cb2f44cf22588",
     "semantic_hash": ""
   },
@@ -30,12 +30,12 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Flutter\\flutter_export_environment.sh": {
-    "mtime": 1781044218.6855283,
-    "ast_hash": "29074380f9022de86748fcd06ad4032a",
+    "mtime": 1781369100.9711108,
+    "ast_hash": "f894d474945ef28ce647efcb37c7c7cc",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Flutter\\ephemeral\\flutter_lldb_helper.py": {
-    "mtime": 1781044218.6810281,
+    "mtime": 1781369100.9676113,
     "ast_hash": "98fc75412162af387e2e3461e4e58094",
     "semantic_hash": ""
   },
@@ -50,7 +50,7 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\GeneratedPluginRegistrant.m": {
-    "mtime": 1781044573.2451909,
+    "mtime": 1781362005.6854205,
     "ast_hash": "9cd8b87bfba33af6fc3eed0a11532f06",
     "semantic_hash": ""
   },
@@ -60,13 +60,13 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json": {
-    "mtime": 1760881716.5104408,
-    "ast_hash": "31a08e429403e265cabfb31b3d65f049",
+    "mtime": 1781044618.7136185,
+    "ast_hash": "c870f277d0c83d1af12f8dc2d368879a",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\Contents.json": {
-    "mtime": 1760881716.5124407,
-    "ast_hash": "b9e927ac17345f2d5f052fe68a3487f9",
+    "mtime": 1781044621.1432974,
+    "ast_hash": "0827e8a9ba504cc1db6605cbd01fc656",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\RunnerTests\\RunnerTests.swift": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\main.dart": {
-    "mtime": 1781044502.470956,
-    "ast_hash": "2d5dba1d80be219078226b308339c73f",
+    "mtime": 1781133309.4337027,
+    "ast_hash": "fd94d2d4a152c9e797b248d26b54aed8",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\widget_test.dart": {
@@ -90,18 +90,18 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\CONTEXT.md": {
-    "mtime": 1781044198.567359,
-    "ast_hash": "7f9c5212a8e82fa87f6afd755225c242",
+    "mtime": 1781372240.7216015,
+    "ast_hash": "b28d678d42460a9225e26e3fff049150",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\pubspec.yaml": {
-    "mtime": 1781044402.8652315,
-    "ast_hash": "00b2522ae158d8d919f0dfd62a415b1e",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "f6365528eb3c5f777cb3459844cdba76",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\README.md": {
-    "mtime": 1781044563.2990394,
-    "ast_hash": "c4a2947bb7a831e52abf30078192e900",
+    "mtime": 1781130710.771303,
+    "ast_hash": "f792ecf6172cf73dd0798f8edb2db616",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0001-flutter-over-react-native.md": {
@@ -125,123 +125,123 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png": {
-    "mtime": 1760881716.5029364,
-    "ast_hash": "13e9c72ec37fac220397aa819fa1ef2d",
+    "mtime": 1781044618.168425,
+    "ast_hash": "afcd30f0a5b9fe327b517b0537163f40",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png": {
-    "mtime": 1760881716.503436,
-    "ast_hash": "6270344430679711b81476e29878caa7",
+    "mtime": 1781044618.168425,
+    "ast_hash": "4166eedfd07a44c3d66301673ff415f7",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png": {
-    "mtime": 1760881716.503436,
-    "ast_hash": "a0a8db5985280b3679d99a820ae2db79",
+    "mtime": 1781044618.1689258,
+    "ast_hash": "8bf28fca666af6ab50562c9996049dd8",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png": {
-    "mtime": 1760881716.503436,
-    "ast_hash": "afe1b655b9f32da22f9a4301bb8e6ba8",
+    "mtime": 1781044618.1689258,
+    "ast_hash": "554792f7ac9d5293def9f1ad4f47aeee",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png": {
-    "mtime": 1760881716.503436,
-    "ast_hash": "57838d52c318faff743130c3fcfae0c6",
+    "mtime": 1781044618.1689258,
+    "ast_hash": "4128008556e13a289de79ca3f8a10eab",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-1024x1024@1x.png": {
-    "mtime": 1760881740.307015,
-    "ast_hash": "c785f8932297af4acd5f5ccb7630f01c",
+    "mtime": 1781044618.70161,
+    "ast_hash": "e23a285fecdce1213d2b1f53341cb0e1",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@1x.png": {
-    "mtime": 1760881740.3100176,
-    "ast_hash": "a2f8558fb1d42514111fbbb19fb67314",
+    "mtime": 1781044618.7006092,
+    "ast_hash": "4daad3d45df16cfa1e95e84d7f11e501",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@2x.png": {
-    "mtime": 1760881740.300007,
-    "ast_hash": "2247a840b6ee72b8a069208af170e5b1",
+    "mtime": 1781044618.7006092,
+    "ast_hash": "8939c57a09edda40305a07696cea77e6",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-20x20@3x.png": {
-    "mtime": 1760881740.3195467,
-    "ast_hash": "1b3b1538136316263c7092951e923e9d",
+    "mtime": 1781044618.7006092,
+    "ast_hash": "ad541a4e310524cd284d32c0d9393cb7",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@1x.png": {
-    "mtime": 1760881740.329575,
-    "ast_hash": "be8887071dd7ec39cb754d236aa9584f",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "e6a07b6f5c71467aaa0a53f441e33eca",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@2x.png": {
-    "mtime": 1760881740.2794738,
-    "ast_hash": "043119ef4faa026ff82bd03f241e5338",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "09998c587a0bd6a32b925879b7fa9b26",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-29x29@3x.png": {
-    "mtime": 1760881740.3130176,
-    "ast_hash": "2b1452c4c1bda6177b4fbbb832df217f",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "86a00fe6f19fe2e7fa921cf43ed4fda8",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@1x.png": {
-    "mtime": 1760881740.2834735,
-    "ast_hash": "2247a840b6ee72b8a069208af170e5b1",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "8939c57a09edda40305a07696cea77e6",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@2x.png": {
-    "mtime": 1760881740.3270757,
-    "ast_hash": "8245359312aea1b0d2412f79a07b0ca5",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "a02fca62b07d6f760ceec9cad0065caf",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-40x40@3x.png": {
-    "mtime": 1760881740.2885015,
-    "ast_hash": "5b3c0902200ce596e9848f22e1f0fe0e",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "aae4d3d0ed5e6e07dbf3f176bde76274",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@2x.png": {
-    "mtime": 1760881740.3030071,
-    "ast_hash": "5b3c0902200ce596e9848f22e1f0fe0e",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "aae4d3d0ed5e6e07dbf3f176bde76274",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-60x60@3x.png": {
-    "mtime": 1760881740.274471,
-    "ast_hash": "e419d22a37bc40ba185aca1acb6d4ac6",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "b95cc82bb060a01e5157a86438e3aba3",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@1x.png": {
-    "mtime": 1760881740.296507,
-    "ast_hash": "36c0d7a7132bdde18898ffdfcfcdc4d2",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "58d8456d6cfb2c5cadf0d38bd6a7117f",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-76x76@2x.png": {
-    "mtime": 1760881740.3315752,
-    "ast_hash": "643842917530acf4c5159ae851b0baf2",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "1418a4a458b9fa3b0222c80a12607bbb",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-83.5x83.5@2x.png": {
-    "mtime": 1760881740.3240602,
-    "ast_hash": "665cb5e3c5729da6d639d26eff47a503",
+    "mtime": 1781044618.7011104,
+    "ast_hash": "be3ea321e151cea8e77785bdd4f5736b",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage.png": {
-    "mtime": 1760881740.2709591,
-    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "mtime": 1781044621.1704712,
+    "ast_hash": "a6cdc266706c404a3204d4bee9a5cd7e",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@2x.png": {
-    "mtime": 1760881740.2659574,
-    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "mtime": 1781044621.229489,
+    "ast_hash": "6cdfbed443a0e415438a775525931384",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\LaunchImage@3x.png": {
-    "mtime": 1760881740.2599509,
-    "ast_hash": "978c1bee49d7ad5fc1a4d81099b13e18",
+    "mtime": 1781044621.3110561,
+    "ast_hash": "7ec20f0578ebeae510a32fb336f9ea40",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\app.dart": {
-    "mtime": 1781044502.0944233,
-    "ast_hash": "49ac336e4c9555f49100a47d8e69d083",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "908dd1aa30171e3e7d60b67d7944c26e",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\cache\\local_cache.dart": {
@@ -250,18 +250,18 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\config\\env.dart": {
-    "mtime": 1781044403.6753967,
-    "ast_hash": "218222a2a8fbf6b7121ebdd925a8c89a",
+    "mtime": 1781044975.3579226,
+    "ast_hash": "b330c658936f5ea6a78b9b1a556de5fa",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\router\\app_router.dart": {
-    "mtime": 1781044589.7672749,
-    "ast_hash": "9f3aee8bae3ac07500a0aa7fd79cdc37",
+    "mtime": 1781372065.5653088,
+    "ast_hash": "ab66b5d9d24fb583e57feee733fc99fe",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\balance_history_service.dart": {
-    "mtime": 1781044425.1326523,
-    "ast_hash": "f7540dd040f51ed55cbc8bf125ef074b",
+    "mtime": 1781368675.2338243,
+    "ast_hash": "6b4a9e3873831ec848b19534a94345b2",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\biometric_service.dart": {
@@ -270,38 +270,38 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\forecast_service.dart": {
-    "mtime": 1781044423.7520952,
-    "ast_hash": "c77ea70333a2c80ff17f130da5fed483",
+    "mtime": 1781219899.860286,
+    "ast_hash": "613c5903039035b056cbb39c5d7543d5",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\recurring_detection_service.dart": {
-    "mtime": 1781044427.1945736,
-    "ast_hash": "b9beaa1462123b4b0c37cd1a69f637b2",
+    "mtime": 1781368675.2338243,
+    "ast_hash": "80329669dbcb05d21d1fbb3076f43bc8",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\app_colors.dart": {
-    "mtime": 1781044404.4458382,
-    "ast_hash": "e1e31e4cfc09f24cf75b78fd1404e4d4",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "afd2ceee748f0fc68285cea826d738cb",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\app_theme.dart": {
-    "mtime": 1781044406.7961946,
-    "ast_hash": "ef070fe80f75e32bd8054d8c1e5627ce",
+    "mtime": 1781293225.7902536,
+    "ast_hash": "fb645bd320012244a681b0223ecce92d",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\dedupe.dart": {
-    "mtime": 1781044407.5241683,
-    "ast_hash": "35b32337ff6b2f630a7d62876eb756c2",
+    "mtime": 1781372020.6143923,
+    "ast_hash": "f74f7f215e10597299ba4f92ed24bdd4",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\money.dart": {
-    "mtime": 1781044407.130004,
-    "ast_hash": "c9382f684ced3eb49850643e414de264",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "d6baef66391ca9a05afa6ae3a12b11d6",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\account_row.dart": {
-    "mtime": 1781044455.6679606,
-    "ast_hash": "871b9efaea90d07a66965517500886fd",
+    "mtime": 1781368675.2328236,
+    "ast_hash": "7a0fc2cf9a4c70805311948f5e0cb29b",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\category_icon.dart": {
@@ -310,8 +310,8 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\empty_state.dart": {
-    "mtime": 1781044449.2474995,
-    "ast_hash": "c0c421b8530ca9e83fc491913e89a941",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "9fd947bd81b48fa3b967a0092f9b25e4",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\period_pills.dart": {
@@ -320,33 +320,23 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\skeleton_loader.dart": {
-    "mtime": 1781044450.4409347,
-    "ast_hash": "cf72374d80656f99e7fd6672a917dec0",
+    "mtime": 1781369232.7386067,
+    "ast_hash": "9dff30181a5b85bd8d6d0029c60ec9d2",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\swoosh_card.dart": {
-    "mtime": 1781044448.417848,
-    "ast_hash": "9c12a6767548f04f54050cba0c08cb62",
+    "mtime": 1781368675.2328236,
+    "ast_hash": "0f8827b738572ae89e7157528dfbc109",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\transaction_tile.dart": {
-    "mtime": 1781044456.7110195,
-    "ast_hash": "d707df0209933451ad3ed8081e229558",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\csv_import_service.dart": {
-    "mtime": 1781044442.2186174,
-    "ast_hash": "66f1750273dd108102aad52704e84283",
+    "mtime": 1781368675.2328236,
+    "ast_hash": "dc21f219f8e00fb2b227705d6c51b8b6",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\account_repository.dart": {
-    "mtime": 1781044430.9558253,
-    "ast_hash": "4c234f2e49d0c7018ac2a6abceb89a40",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\bank_connection_repository.dart": {
-    "mtime": 1781044439.2688653,
-    "ast_hash": "bf73c0c412025e94924bb9aa9473058c",
+    "mtime": 1781293279.0757284,
+    "ast_hash": "55618b9ae4a97163949cfa68955b6f26",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\budget_repository.dart": {
@@ -365,38 +355,23 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\recurring_repository.dart": {
-    "mtime": 1781044437.3248465,
-    "ast_hash": "07f596e69eb7d9d68e354023a16c7397",
+    "mtime": 1781219893.5330012,
+    "ast_hash": "4e3e3f50d2402e7c41cd3610ac83fea2",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\transaction_repository.dart": {
-    "mtime": 1781044434.4787781,
-    "ast_hash": "f1f0bef7d42b18ecc3ff38c58a6b03fd",
+    "mtime": 1781372036.1754851,
+    "ast_hash": "746e87ea1ec417efd91ec40967809e57",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\screens\\accounts_screen.dart": {
-    "mtime": 1781044474.1366367,
-    "ast_hash": "77e8bd1308eb48e640c6648a86c02b4a",
+    "mtime": 1781372061.9808924,
+    "ast_hash": "1d26660410c7356f43a02b8816b62bcc",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\screens\\account_detail_screen.dart": {
-    "mtime": 1781044589.7672749,
-    "ast_hash": "2ed0cf50b894ff75fbdfd6cbc2f03e41",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\screens\\add_account_screen.dart": {
-    "mtime": 1781044476.324077,
-    "ast_hash": "37e25634e691c301708616a7e224a6b1",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\screens\\add_transaction_screen.dart": {
-    "mtime": 1781044481.5760958,
-    "ast_hash": "086fe06db6ed3938c5f06abe981a031e",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\screens\\csv_import_screen.dart": {
-    "mtime": 1781044483.5572224,
-    "ast_hash": "b28ef5e7cffc3907d976d4283023675a",
+    "mtime": 1781372080.4612067,
+    "ast_hash": "bf1ce943919cbc5d38db29a1f4eb7090",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\auth\\screens\\login_screen.dart": {
@@ -409,54 +384,29 @@
     "ast_hash": "e524182fc9f951edc0c561e29ac77d2a",
     "semantic_hash": ""
   },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\budgets\\screens\\budgets_screen.dart": {
-    "mtime": 1781044589.8448377,
-    "ast_hash": "83b6e05308cb9b40bda51b7be308127f",
-    "semantic_hash": ""
-  },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\screens\\home_screen.dart": {
-    "mtime": 1781044589.8448377,
-    "ast_hash": "11acf04ff50c942a1616fce53bf8f609",
+    "mtime": 1781372068.021013,
+    "ast_hash": "533ce03b701893a160bbc731fbeab6a0",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\widgets\\balance_chart.dart": {
-    "mtime": 1781044463.9704187,
-    "ast_hash": "00f7c92f85a5645f455f844efd48a330",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\openbanking\\screens\\connect_bank_screen.dart": {
-    "mtime": 1781044498.8476603,
-    "ast_hash": "0e123f63d1d0117f4fdef06c168a3f16",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\planning\\screens\\planning_screen.dart": {
-    "mtime": 1781044599.0999167,
-    "ast_hash": "c0998017701ac995289092e39661e55d",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\recurring\\screens\\recurring_screen.dart": {
-    "mtime": 1781044491.991028,
-    "ast_hash": "f1725fe842469f2041c009430017f07f",
+    "mtime": 1781368675.2338243,
+    "ast_hash": "f47249eae764bdd012c287ebf6e51e51",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\shell\\app_shell.dart": {
-    "mtime": 1781044499.8690596,
-    "ast_hash": "5d3ac2b07bbb7ac2a3da64a10e6ddb5c",
+    "mtime": 1781369313.5203662,
+    "ast_hash": "1b79b21285de40022ef6c30894e25d1c",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\account.dart": {
-    "mtime": 1781044410.814402,
-    "ast_hash": "a388db90f4be7ea743c6b37fa4b865c7",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\bank_connection.dart": {
-    "mtime": 1781044418.815145,
-    "ast_hash": "9ba2b25b9068468b3a4336faae276843",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "3f5a66ae3566489b5179667b3a59090f",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\budget.dart": {
-    "mtime": 1781044414.985008,
-    "ast_hash": "e5050091f15d095aad7cbf76c567becc",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "7aa973c827226a066aa7956114e45beb",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\category.dart": {
@@ -475,28 +425,18 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\transaction.dart": {
-    "mtime": 1781044412.9794128,
-    "ast_hash": "7e2128173be59de450ff7c73b0c3f5d6",
+    "mtime": 1781219888.139843,
+    "ast_hash": "0ce386f3482ddfe073ebe9efa7e0c26a",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\providers\\data_providers.dart": {
-    "mtime": 1781044447.715009,
-    "ast_hash": "f8f6ba0244db9cc7da0ccdc80f2d0d1f",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "601b9fcf7b1d8b1b2dd629d656afbcb0",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\providers\\providers.dart": {
-    "mtime": 1781044445.7904527,
-    "ast_hash": "0030bf4fdf1aa72ab95e7576d6039a65",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\functions\\gocardless-connect\\index.ts": {
-    "mtime": 1781044507.4078853,
-    "ast_hash": "19d3e70a793602fa0101358678eb2306",
-    "semantic_hash": ""
-  },
-  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\functions\\gocardless-sync\\index.ts": {
-    "mtime": 1781044511.885567,
-    "ast_hash": "674b4664f587f1575cca9b3029e71309",
+    "mtime": 1781368675.2328236,
+    "ast_hash": "5a53aef4c21668c81a6762d2ca0eb1fd",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250609120000_initial_schema.sql": {
@@ -510,18 +450,593 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\forecast_service_test.dart": {
-    "mtime": 1781044589.946393,
-    "ast_hash": "69f81475da73eeb15db8dc9e92223d97",
+    "mtime": 1781220095.0743308,
+    "ast_hash": "7538087869fb87886ffa36f748356ec9",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\money_test.dart": {
-    "mtime": 1781044559.5135028,
-    "ast_hash": "1cb14ef77b7dd0e19b3f2bed17547009",
+    "mtime": 1781368675.2333238,
+    "ast_hash": "aa74f47994cf3660a24aa7d5fc1f991c",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\assets\\images\\app_icon.png": {
     "mtime": 1781044549.583505,
     "ast_hash": "24978efd235aa4fe2bc4e4ad921ab7fb",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchBackground.imageset\\Contents.json": {
+    "mtime": 1781044621.2124844,
+    "ast_hash": "b5f36b5cc2eecbd74b7cfcb6a89fe6d1",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\account_balance_service.dart": {
+    "mtime": 1781372023.5188005,
+    "ast_hash": "2b68297551dd7221ea22a56cbf556bb3",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\analytics_service.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "ed8831324368479f4444665cf15eda47",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\categorization_service.dart": {
+    "mtime": 1781133301.7262132,
+    "ast_hash": "af4fa21995a7a5c61b02f89dbd032e7e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\category_matcher_service.dart": {
+    "mtime": 1781133299.7922628,
+    "ast_hash": "851521c378445a5a9d8b049966ddaa6f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\dev_auth_bootstrap.dart": {
+    "mtime": 1781133382.2829514,
+    "ast_hash": "73c7314e07cd9a1bbeada6c094d9a6e1",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\price_change_service.dart": {
+    "mtime": 1781219870.9395907,
+    "ast_hash": "51acde50b2940397451a2072aeb236b3",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\safe_to_spend_service.dart": {
+    "mtime": 1781220002.674743,
+    "ast_hash": "8c514abe3d8fe89d0743483d1ff2ea86",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\services\\transfer_noise_classifier.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "0c19cedca1b8af802e1faad118f3496e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\chart_theme.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "14ee3cf5bcee2264ef2315d160337aa6",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\fab_location.dart": {
+    "mtime": 1781219566.2849176,
+    "ast_hash": "747c128a6b847316815a4fda064d1b3b",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\spacing.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "aa5fa7ad5d5b1aa0cecc1f9e3f9cf309",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\theme\\swoosh_scroll_behavior.dart": {
+    "mtime": 1781217920.680715,
+    "ast_hash": "1a39d63c1c30a603f6e92da95e547fcf",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\analytics.dart": {
+    "mtime": 1781215569.283661,
+    "ast_hash": "327a22a785d0315efd970ba05c6b0b4f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\app_snackbar.dart": {
+    "mtime": 1781304585.4509587,
+    "ast_hash": "df1160030236eb448a9ede64620062a4",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\haptics.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "44d31996ac5ec05d3f503a538cf21270",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\sheet_navigation.dart": {
+    "mtime": 1781293255.6126275,
+    "ast_hash": "f0937da9ac066f54d44a026bdf3dd46b",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\utils\\view_insets.dart": {
+    "mtime": 1781304593.612416,
+    "ast_hash": "3a73e96020db5571b4d4e0f6e9983173",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\animated_balance_text.dart": {
+    "mtime": 1781220040.231319,
+    "ast_hash": "7000ab3be4538b29563ef0a7456a775f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\error_state.dart": {
+    "mtime": 1781219902.8976815,
+    "ast_hash": "529aadb1e8853d86cea4fe88a42ee8ff",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\frosted_sliver_app_bar.dart": {
+    "mtime": 1781293226.4153795,
+    "ast_hash": "2be93bae6a743a21956dd040f72a714c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\core\\widgets\\swoosh_chip.dart": {
+    "mtime": 1781219903.4202604,
+    "ast_hash": "8aa1c854cba068a9116741c0a1bf13e1",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\csv_parse_utils.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "afd624f288ca7aff8ebc78eea11382a5",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\generic_column_mapping.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "fbbf09a91c357752f2377e563c62debd",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\import_parse_exception.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "01e3b9ce23ef976408c86c09891a743b",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\import_service.dart": {
+    "mtime": 1781372053.439962,
+    "ast_hash": "5cbe78cbeb9d53a122bcbf783fbadc9c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\parsed_statement.dart": {
+    "mtime": 1781372009.2146728,
+    "ast_hash": "c8e1a2637e45f1632a44cb6f8163f0f1",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\statement_adapter.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "9b9d885898ea8823908c8cef6c0146cf",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\statement_detector.dart": {
+    "mtime": 1781372023.3312993,
+    "ast_hash": "a885381a77b25320ea89cfcac2e53864",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\amex_csv_adapter.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "f4be2ee76cb582edbf49fa8687d9aa20",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\barclays_csv_adapter.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "f3915715569b083953bc3d56408bd88a",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\barclays_pdf_adapter.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "fa86b052ef888743912bd03798a21a2a",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\generic_csv_adapter.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "d7fb210f77ed9ebb6b7057e58c16b6ee",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\wise_activity_csv_adapter.dart": {
+    "mtime": 1781372013.0528922,
+    "ast_hash": "96bd8c97a2278a1cf87bcb109356347e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\wise_csv_adapter.dart": {
+    "mtime": 1781372083.2229755,
+    "ast_hash": "b852a05d4a1f0f80aac8ac182166ff5d",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\import\\adapters\\wise_pdf_adapter.dart": {
+    "mtime": 1781372449.8251977,
+    "ast_hash": "c7d7b987f9787f80c46a5fc0dc0b98bd",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\balance_snapshot_repository.dart": {
+    "mtime": 1781219867.4313138,
+    "ast_hash": "348078c95f97bcb19b16cbeaa93e268c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\data\\repositories\\category_rule_repository.dart": {
+    "mtime": 1781133387.7421365,
+    "ast_hash": "f5260648658920f8a328f5305ea589f8",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\widgets\\csv_import_flow.dart": {
+    "mtime": 1781372465.3169222,
+    "ast_hash": "ff0821cfe5b90bb6bc568df5cebd82a0",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\widgets\\import_review_sheet.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "d6c919a039604c034592424fd6844551",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\accounts\\widgets\\import_statement_sheet.dart": {
+    "mtime": 1781372040.0914955,
+    "ast_hash": "2316ffa0818ae1b30b4be36d0fe52671",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\auth\\widgets\\dev_auth_gate.dart": {
+    "mtime": 1781133295.2017002,
+    "ast_hash": "6ef854837ed6ae4b2f35633dca8eaff0",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\home_balance_view.dart": {
+    "mtime": 1781217920.9611638,
+    "ast_hash": "768262ce318bd79fe7467f30205e901e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\widgets\\price_change_alert_card.dart": {
+    "mtime": 1781293247.7101862,
+    "ast_hash": "45162b4e4ee24618444a7c6f8387612f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\widgets\\safe_to_spend_card.dart": {
+    "mtime": 1781219908.3494966,
+    "ast_hash": "83f52625f6509a07bc83c101ab8d73a7",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\home\\widgets\\upcoming_bills_card.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "15187a6a2ec75530802816f9ebbfe2be",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\insights\\screens\\insights_screen.dart": {
+    "mtime": 1781372082.6260571,
+    "ast_hash": "80a7f01bdf827aabc6b9fa27b1649509",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\insights\\widgets\\category_trend_chart.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "f61acca4c2fcd83b0d2899664c045221",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\onboarding\\screens\\welcome_screen.dart": {
+    "mtime": 1781372071.2189388,
+    "ast_hash": "cb2d2488f31beffd001264f012e2f857",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\settings\\screens\\settings_screen.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "de3f089d52f5a1cba965a27bcb136bd8",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\spending\\screens\\spending_screen.dart": {
+    "mtime": 1781372068.4112892,
+    "ast_hash": "c653edbf59fc131302e1f5e9d17ad7b7",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\spending\\widgets\\budget_sheet.dart": {
+    "mtime": 1781220027.7158508,
+    "ast_hash": "99f433e2f547f6e265a6d2164e26c5c8",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\spending\\widgets\\spending_donut_chart.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "4486cc06f8179cf18d1064578bcc512c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\features\\transactions\\screens\\transactions_screen.dart": {
+    "mtime": 1781372837.3734715,
+    "ast_hash": "ccd9dcea76228febc56ad7eaab69ab2b",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\category_rule.dart": {
+    "mtime": 1781133304.7289896,
+    "ast_hash": "858d1d60c523caddc4aa391eb3dd1ebd",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\models\\detected_recurring.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "309d82039e0cd98f63d5eb6b6c453fef",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\lib\\providers\\onboarding_provider.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "76b2683a41e31f5774e88744bb12e502",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250609224300_fix_auth_trigger_search_path.sql": {
+    "mtime": 1781045001.0444257,
+    "ast_hash": "176e74291fba35eac9563d0949448f1f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250610240000_accounts_external_ref_unique.sql": {
+    "mtime": 1781132166.3136506,
+    "ast_hash": "55c6d9f690b5f2631f2adf3a51f9aa81",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250610250000_bank_connections_unique.sql": {
+    "mtime": 1781133275.174876,
+    "ast_hash": "3c3450e87628046d238bc7ded26513d0",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250610260000_drop_investment_account_type.sql": {
+    "mtime": 1781133275.2838578,
+    "ast_hash": "aea9b394983377c2e2d8f9a3f1784c44",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250610270000_category_rules.sql": {
+    "mtime": 1781133275.8869572,
+    "ast_hash": "e42743df6f202697f2f0edd2c3e3a213",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250612230000_user_id_defaults.sql": {
+    "mtime": 1781303220.738748,
+    "ast_hash": "84ff1df372b5cced3153a71063691391",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\supabase\\migrations\\20250613000000_strip_bank_integrations_clean_slate.sql": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "2454a9b5b2a9a99aff53151b00757e11",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\recurring_detection_service_test.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "44b4d7e4688034e307c4ae7deffc7ab1",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\core\\services\\account_balance_service_test.dart": {
+    "mtime": 1781372300.0086215,
+    "ast_hash": "2f4426a69c8eb9ccc4d6595d5eddc209",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\core\\services\\transfer_noise_classifier_test.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "740f44f758d47cb51b2af9d1600cc8d6",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\core\\utils\\dedupe_test.dart": {
+    "mtime": 1781372229.4855175,
+    "ast_hash": "b76a2695e256433b9cae6c2df438ce98",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\amex_csv_adapter_test.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "0f5f86c3fe8dabb2d3307cdc54aebcfa",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\barclays_csv_adapter_test.dart": {
+    "mtime": 1781368675.2328236,
+    "ast_hash": "dc183baf3b1312a03304e2f694e40e73",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\barclays_pdf_adapter_test.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "021b32c1932eddd939d9562286540f1b",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\generic_csv_adapter_test.dart": {
+    "mtime": 1781368675.2333238,
+    "ast_hash": "54a20e1c4958b93e873cb9416ec298e3",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\generic_csv_preview_test.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "867e14141b55f7c91a7cc98205057432",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\wise_activity_csv_adapter_test.dart": {
+    "mtime": 1781372226.7862732,
+    "ast_hash": "f290c350d37c20f97af77fa6a0b2b003",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\wise_csv_adapter_test.dart": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "a6a20a048889c3bbfd505b67e5b1a9cf",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\data\\import\\wise_pdf_adapter_test.dart": {
+    "mtime": 1781372227.9880974,
+    "ast_hash": "42e0c4ce4ecfe6a181f37c498b2022bf",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\PRIVACY.md": {
+    "mtime": 1781128778.794902,
+    "ast_hash": "19f6effd86dc096f6f7346b864dad710",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\TERMS.md": {
+    "mtime": 1781128781.3070235,
+    "ast_hash": "4668a457f6971f34f78eab12e5fbe9c7",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0004-enable-banking-replacement.md": {
+    "mtime": 1781128267.6551864,
+    "ast_hash": "6a600d9395ba3f8bfed1021c46c0643c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0005-monzo-direct-csv-first.md": {
+    "mtime": 1781130710.872158,
+    "ast_hash": "6715cea15842df2f99fddcac83e8bf1e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0006-rules-based-categorization.md": {
+    "mtime": 1781133367.1350982,
+    "ast_hash": "6403829dd21865726719867e492f4216",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0007-retire-transfer-pairing.md": {
+    "mtime": 1781220007.9163785,
+    "ast_hash": "7d5332b78aed92c52c74348e04303fd8",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0008-enable-banking-restricted-production.md": {
+    "mtime": 1781293290.9617872,
+    "ast_hash": "36a5cea9acb6556a9e76aecfbd06fd97",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0009-statement-only-imports.md": {
+    "mtime": 1781372243.7737663,
+    "ast_hash": "d877ec58e837031ad6ec81761297507d",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\fixtures\\barclays_statement.txt": {
+    "mtime": 1781368675.2338243,
+    "ast_hash": "a6137f489e633c4916c5957af060f87d",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\fixtures\\wise_statement.pdf": {
+    "mtime": 1781369505.2767372,
+    "ast_hash": "46bbf67a8a192d6763dc0f3c74727b10",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable\\background.png": {
+    "mtime": 1781044620.9958968,
+    "ast_hash": "71c063051d2c43d4ab2b99c0fabf7e01",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-hdpi\\android12splash.png": {
+    "mtime": 1781044620.9993968,
+    "ast_hash": "800fc2f02ce1feecc0ddbdf3e6cafe1f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-hdpi\\ic_launcher_foreground.png": {
+    "mtime": 1781044618.2233646,
+    "ast_hash": "b444295e0379bd13a81dec442cc6fcd5",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-hdpi\\splash.png": {
+    "mtime": 1781044620.9228663,
+    "ast_hash": "800fc2f02ce1feecc0ddbdf3e6cafe1f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-mdpi\\android12splash.png": {
+    "mtime": 1781044620.972391,
+    "ast_hash": "a6cdc266706c404a3204d4bee9a5cd7e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-mdpi\\ic_launcher_foreground.png": {
+    "mtime": 1781044618.2233646,
+    "ast_hash": "e70f8918838634801d0bcda054a04e6c",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-mdpi\\splash.png": {
+    "mtime": 1781044620.8988557,
+    "ast_hash": "a6cdc266706c404a3204d4bee9a5cd7e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-night-hdpi\\android12splash.png": {
+    "mtime": 1781044621.0479171,
+    "ast_hash": "800fc2f02ce1feecc0ddbdf3e6cafe1f",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-night-mdpi\\android12splash.png": {
+    "mtime": 1781044621.0174034,
+    "ast_hash": "a6cdc266706c404a3204d4bee9a5cd7e",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-night-xhdpi\\android12splash.png": {
+    "mtime": 1781044621.0899358,
+    "ast_hash": "6cdfbed443a0e415438a775525931384",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-night-xxhdpi\\android12splash.png": {
+    "mtime": 1781044621.1759775,
+    "ast_hash": "7ec20f0578ebeae510a32fb336f9ea40",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-night-xxxhdpi\\android12splash.png": {
+    "mtime": 1781044621.2389958,
+    "ast_hash": "434cd5a2caeab23b4c9cf339787be343",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-v21\\background.png": {
+    "mtime": 1781044620.9968987,
+    "ast_hash": "71c063051d2c43d4ab2b99c0fabf7e01",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xhdpi\\android12splash.png": {
+    "mtime": 1781044621.0454175,
+    "ast_hash": "6cdfbed443a0e415438a775525931384",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1781044618.2233646,
+    "ast_hash": "5635952d8cda963493a0e58d58e056d0",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xhdpi\\splash.png": {
+    "mtime": 1781044620.954881,
+    "ast_hash": "6cdfbed443a0e415438a775525931384",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxhdpi\\android12splash.png": {
+    "mtime": 1781044621.1204398,
+    "ast_hash": "7ec20f0578ebeae510a32fb336f9ea40",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1781044618.2233646,
+    "ast_hash": "aabe61afeb3ad79019098c6e56f3339d",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxhdpi\\splash.png": {
+    "mtime": 1781044621.0434182,
+    "ast_hash": "7ec20f0578ebeae510a32fb336f9ea40",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxxhdpi\\android12splash.png": {
+    "mtime": 1781044621.1729765,
+    "ast_hash": "434cd5a2caeab23b4c9cf339787be343",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1781044618.2233646,
+    "ast_hash": "fc924929650a21b828133cde5b3bb148",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\android\\app\\src\\main\\res\\drawable-xxxhdpi\\splash.png": {
+    "mtime": 1781044621.1114404,
+    "ast_hash": "434cd5a2caeab23b4c9cf339787be343",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-50x50@1x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "f23e6422f21433fdb21346d7199c6f26",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-50x50@2x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "103c33bf6b3343c2388d5d1e7f2819a5",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-57x57@1x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "14122bffba8e87d11f4a0b2ce85d675a",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-57x57@2x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "9570d82ef41aff56b6cefa63aaae2f56",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-72x72@1x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "afcd30f0a5b9fe327b517b0537163f40",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Icon-App-72x72@2x.png": {
+    "mtime": 1781044618.7011104,
+    "ast_hash": "554792f7ac9d5293def9f1ad4f47aeee",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchBackground.imageset\\background.png": {
+    "mtime": 1781044621.2119842,
+    "ast_hash": "71c063051d2c43d4ab2b99c0fabf7e01",
     "semantic_hash": ""
   }
 }

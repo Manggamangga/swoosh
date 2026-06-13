@@ -1,9 +1,9 @@
+import 'package:swoosh/models/detected_recurring.dart';
 import 'package:swoosh/models/recurring_payment.dart';
 import 'package:swoosh/models/transaction.dart';
 
 class RecurringDetectionService {
-  List<RecurringPayment> detect({
-    required String userId,
+  List<DetectedRecurring> detect({
     required List<Transaction> transactions,
   }) {
     final expenses = transactions
@@ -12,11 +12,14 @@ class RecurringDetectionService {
 
     final groups = <String, List<Transaction>>{};
     for (final tx in expenses) {
-      final key = '${tx.merchant ?? tx.description}|${tx.amountPence.abs()}';
+      final key = _detectionKey(
+        merchant: tx.merchant ?? tx.description,
+        amountPence: tx.amountPence.abs(),
+      );
       groups.putIfAbsent(key, () => []).add(tx);
     }
 
-    final detected = <RecurringPayment>[];
+    final detected = <DetectedRecurring>[];
     for (final entry in groups.entries) {
       final txs = entry.value..sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
       if (txs.length < 2) continue;
@@ -31,24 +34,41 @@ class RecurringDetectionService {
       final cadence = _inferCadence(intervals);
       if (cadence == null) continue;
 
+      final amounts = txs.map((t) => t.amountPence.abs()).toList();
+      final typicalAmount = _median(amounts);
       final last = txs.last;
+
       detected.add(
-        RecurringPayment(
-          id: '',
-          userId: userId,
+        DetectedRecurring(
+          detectionKey: entry.key,
           name: last.merchant ?? last.description,
-          amountPence: last.amountPence,
-          currency: last.currency,
+          typicalAmountPence: typicalAmount,
           cadence: cadence,
-          nextDate: _nextFromCadence(cadence, last.transactionDate),
+          monthlyTotalPence: _monthlyEquivalent(typicalAmount, cadence),
+          lastSeenDate: last.transactionDate,
+          occurrenceCount: txs.length,
           accountId: last.accountId,
           categoryId: last.categoryId,
-          autoDetected: true,
+          currency: last.currency,
         ),
       );
     }
 
     return detected;
+  }
+
+  static String detectionKeyFor({
+    required String name,
+    required int amountPence,
+  }) =>
+      _detectionKey(merchant: name, amountPence: amountPence.abs());
+
+  static String _detectionKey({
+    required String merchant,
+    required int amountPence,
+  }) {
+    final normalized = merchant.trim().toLowerCase();
+    return '$normalized|$amountPence';
   }
 
   RecurringCadence? _inferCadence(List<int> intervals) {
@@ -61,16 +81,36 @@ class RecurringDetectionService {
     return null;
   }
 
-  DateTime _nextFromCadence(RecurringCadence cadence, DateTime last) {
+  int _monthlyEquivalent(int amountPence, RecurringCadence cadence) {
     switch (cadence) {
       case RecurringCadence.weekly:
-        return last.add(const Duration(days: 7));
+        return (amountPence * 52 / 12).round();
       case RecurringCadence.monthly:
-        return DateTime(last.year, last.month + 1, last.day);
+        return amountPence;
       case RecurringCadence.quarterly:
-        return DateTime(last.year, last.month + 3, last.day);
+        return (amountPence / 3).round();
       case RecurringCadence.yearly:
-        return DateTime(last.year + 1, last.month, last.day);
+        return (amountPence / 12).round();
+    }
+  }
+
+  int _median(List<int> values) {
+    final sorted = List<int>.from(values)..sort();
+    final mid = sorted.length ~/ 2;
+    if (sorted.length.isOdd) return sorted[mid];
+    return ((sorted[mid - 1] + sorted[mid]) / 2).round();
+  }
+
+  DateTime nextDateFrom(RecurringCadence cadence, DateTime lastSeen) {
+    switch (cadence) {
+      case RecurringCadence.weekly:
+        return lastSeen.add(const Duration(days: 7));
+      case RecurringCadence.monthly:
+        return DateTime(lastSeen.year, lastSeen.month + 1, lastSeen.day);
+      case RecurringCadence.quarterly:
+        return DateTime(lastSeen.year, lastSeen.month + 3, lastSeen.day);
+      case RecurringCadence.yearly:
+        return DateTime(lastSeen.year + 1, lastSeen.month, lastSeen.day);
     }
   }
 }

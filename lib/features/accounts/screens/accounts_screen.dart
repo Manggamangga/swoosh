@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/theme/fab_location.dart';
+import 'package:swoosh/core/theme/spacing.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/account_row.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
-import 'package:swoosh/features/accounts/widgets/add_account_chooser.dart';
+import 'package:swoosh/features/accounts/widgets/import_statement_sheet.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/providers/data_providers.dart';
-import 'package:swoosh/providers/providers.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -20,31 +20,16 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountsProvider);
-    final connectionsAsync = ref.watch(bankConnectionsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Accounts'),
-        actions: [
-          connectionsAsync.maybeWhen(
-            data: (connections) {
-              if (connections.isEmpty) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.settings_ethernet),
-                tooltip: 'Manage connections',
-                onPressed: () => context.push('/connect-bank'),
-              );
-            },
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
       ),
       floatingActionButtonLocation:
           FabAboveNavBarLocation(ViewInsets.bottomClearance(context)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showAddAccountChooser(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add account'),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showImportStatementSheet(context, ref),
+        child: const Icon(Icons.add),
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(accountsProvider),
@@ -52,7 +37,11 @@ class AccountsScreen extends ConsumerWidget {
           skipLoadingOnReload: true,
           loading: () => ListView(
             padding: ViewInsets.listPadding(context, includeFab: true),
-            children: const [SkeletonCard(), SizedBox(height: 16), SkeletonCard()],
+            children: const [
+              SkeletonCard(),
+              SizedBox(height: AppSpacing.lg),
+              SkeletonAccountList(itemCount: 4),
+            ],
           ),
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (accounts) {
@@ -63,11 +52,9 @@ class AccountsScreen extends ConsumerWidget {
                   EmptyState(
                     icon: Icons.account_balance_outlined,
                     title: 'No accounts yet',
-                    subtitle: 'Add your Monzo, Barclays, Wise, or other accounts',
-                    action: ElevatedButton(
-                      onPressed: () => showAddAccountChooser(context, ref),
-                      child: const Text('Add account'),
-                    ),
+                    subtitle: 'Import a bank statement to add your first account',
+                    actionLabel: 'Import statement',
+                    onAction: () => showImportStatementSheet(context, ref),
                   ),
                 ],
               );
@@ -89,7 +76,9 @@ class AccountsScreen extends ConsumerWidget {
                 final type = sections[index];
                 final sectionAccounts = grouped[type]!;
                 return Padding(
-                  padding: EdgeInsets.only(bottom: index == sections.length - 1 ? 0 : 20),
+                  padding: EdgeInsets.only(
+                    bottom: index == sections.length - 1 ? 0 : AppSpacing.sectionGap,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -101,21 +90,22 @@ class AccountsScreen extends ConsumerWidget {
                         ),
                         color: _colorForType(type),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       SwooshCard(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.xs,
                         ),
                         child: Column(
-                          children: sectionAccounts
-                              .map(
-                                (account) => AccountRow(
-                                  account: account,
-                                  onTap: () => context.push('/accounts/${account.id}'),
-                                ),
-                              )
-                              .toList(),
+                          children: [
+                            for (var i = 0; i < sectionAccounts.length; i++)
+                              AccountRow(
+                                account: sectionAccounts[i],
+                                onTap: () =>
+                                    context.push('/accounts/${sectionAccounts[i].id}'),
+                                showDivider: i < sectionAccounts.length - 1,
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -135,6 +125,8 @@ class AccountsScreen extends ConsumerWidget {
         return AppColors.everyday;
       case AccountType.savings:
         return AppColors.savings;
+      case AccountType.credit:
+        return AppColors.credit;
     }
   }
 }
@@ -157,16 +149,11 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          style: AppTextStyles.sectionTitle(context),
         ),
         Text(
           Money.format(total),
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
+          style: AppTextStyles.amount(context, color: color),
         ),
       ],
     );

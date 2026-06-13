@@ -1,0 +1,22 @@
+Barclays Bank Account Statement
+
+Sort Code 20-92-54    Account no. 93172724
+
+Statement period 30 May - 05 Jun 2026
+
+Start balance £1,474.11    End balance £2,061.74
+
+Date    Description    Money out    Money in    Balance
+26 May  JESLYN CHEONG    723.00    751.11
+SEAN FT
+26 May  SKY DIGITAL    22.00    729.11
+00625166895239 DDR
+26 May  MONEYBOX    55.00    674.11
+3ECYWKD DDR
+26 May  MONEYBOX    1,054.45    1,728.56
+MONEYBOX-922C5C424 BG
+Ref: MONEYBOX-922C5C424 BG
+26 May  SEAN DARIAN LOH YI KIT    1,000.00    728.56
+SEAN WISE FT
+28 May  MTCE LIMITED    1,333.18    2,061.74
+Ref: 540114527 BGC

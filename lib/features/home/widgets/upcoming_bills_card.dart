@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
 import 'package:swoosh/core/utils/money.dart';
@@ -24,7 +23,6 @@ class UpcomingBillsCard extends StatelessWidget {
     final dateFormat = DateFormat('d MMM');
 
     return SwooshCard(
-      onTap: () => context.push('/planning/recurring'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/services/price_change_service.dart';
+import 'package:swoosh/core/services/recurring_detection_service.dart';
 import 'package:swoosh/core/services/safe_to_spend_service.dart';
 import 'package:swoosh/core/utils/analytics.dart';
 import 'package:swoosh/core/widgets/period_pills.dart';
@@ -8,9 +9,11 @@ import 'package:swoosh/features/home/home_balance_view.dart';
 import 'package:swoosh/models/account.dart';
 import 'package:swoosh/models/budget.dart';
 import 'package:swoosh/models/category.dart';
+import 'package:swoosh/models/detected_recurring.dart';
 import 'package:swoosh/models/goal.dart';
 import 'package:swoosh/models/recurring_payment.dart';
 import 'package:swoosh/models/transaction.dart';
+import 'package:swoosh/providers/onboarding_provider.dart';
 import 'package:swoosh/providers/providers.dart';
 
 final accountsProvider = FutureProvider<List<Account>>((ref) async {
@@ -62,21 +65,26 @@ final goalsProvider = FutureProvider<List<Goal>>((ref) async {
   return ref.watch(goalRepositoryProvider).fetchAll();
 });
 
+final netWorthProvider = FutureProvider<int>((ref) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  return ref.watch(analyticsServiceProvider).computeNetWorth(accounts);
+});
+
 final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
   final accounts = await ref.watch(accountsProvider.future);
-  final everydayIds = everydayAccountIds(accounts);
   final txRepo = await ref.watch(transactionRepositoryProvider.future);
   final now = DateTime.now();
   final start = monthStart(now);
   final end = monthEnd(now);
-  final transactions = everydayTransactions(
-    await txRepo.fetchForPeriod(start, end),
-    everydayIds,
-  );
+  final transactions = await txRepo.fetchForPeriod(start, end);
+  final summary = ref.watch(analyticsServiceProvider).computeMonthlySummary(
+        transactions,
+        accounts,
+      );
 
   return MonthlySummary(
-    incomePence: sumIncome(transactions),
-    spendingPence: sumSpending(transactions),
+    incomePence: summary.incomePence,
+    spendingPence: summary.spendingPence,
   );
 });
 
@@ -97,7 +105,6 @@ final balanceHistoryProvider =
   final chartTransactions =
       await ref.watch(chartTransactionsProvider(period).future);
   final balanceService = ref.watch(balanceHistoryServiceProvider);
-  final snapshotRepo = ref.watch(balanceSnapshotRepositoryProvider);
 
   final filtered = accountsForView(accounts, view);
   if (filtered.isEmpty) return const [];
@@ -109,21 +116,11 @@ final balanceHistoryProvider =
       .where((transaction) => accountIds.contains(transaction.accountId))
       .toList();
 
-  final syncedIds = filtered
-      .where((account) => account.source == DataSource.openbanking)
-      .map((account) => account.id)
-      .toList();
-
-  final snapshots = syncedIds.isEmpty
-      ? const <BalancePoint>[]
-      : await snapshotRepo.fetchForAccounts(syncedIds, start, now);
-
   return balanceService.buildHistory(
     accounts: filtered,
     transactions: periodTransactions,
     start: start,
     end: now,
-    snapshots: snapshots,
   );
 });
 
@@ -213,6 +210,117 @@ final spendingMonthProvider =
     totalSpentPence: sumSpending(currentTransactions),
     categories: rows,
   );
+});
+
+final topSpendingCategoriesProvider =
+    FutureProvider<List<CategorySpendingRow>>((ref) async {
+  final now = DateTime.now();
+  final month = DateTime(now.year, now.month, 1);
+  final data = await ref.watch(spendingMonthProvider(month).future);
+  return data.categories.take(5).toList();
+});
+
+class EmergencyFundProgress {
+  const EmergencyFundProgress({
+    required this.currentPence,
+    required this.targetPence,
+  });
+
+  final int currentPence;
+  final int targetPence;
+
+  int get remainingPence => (targetPence - currentPence).clamp(0, targetPence);
+
+  double get progress =>
+      targetPence == 0 ? 0 : (currentPence / targetPence).clamp(0.0, 1.0);
+}
+
+final emergencyFundProgressProvider =
+    FutureProvider<EmergencyFundProgress?>((ref) async {
+  final accounts = await ref.watch(accountsProvider.future);
+  final savingsTotal = accounts
+      .where((account) => account.accountType == AccountType.savings)
+      .fold<int>(0, (sum, account) => sum + account.balancePence);
+
+  final goals = await ref.watch(goalsProvider.future);
+  Goal? emergencyGoal;
+  for (final goal in goals) {
+    if (goal.name.toLowerCase().contains('emergency')) {
+      emergencyGoal = goal;
+      break;
+    }
+  }
+
+  final prefs = await ref.watch(sharedPreferencesProvider.future);
+  final targetFromPrefs = prefs.getInt('emergency_fund_target_pence');
+  final target = emergencyGoal?.targetAmountPence ?? targetFromPrefs;
+  if (target == null || target <= 0) return null;
+
+  final current = emergencyGoal?.currentAmountPence ?? savingsTotal;
+  return EmergencyFundProgress(currentPence: current, targetPence: target);
+});
+
+final detectedRecurringProvider =
+    FutureProvider<List<DetectedRecurring>>((ref) async {
+  final transactions = await ref.watch(allTransactionsProvider.future);
+  final confirmed = await ref.watch(recurringProvider.future);
+  final dismissed = ref.watch(dismissedRecurringKeysProvider);
+
+  final confirmedKeys = confirmed
+      .map(
+        (p) => RecurringDetectionService.detectionKeyFor(
+          name: p.name,
+          amountPence: p.amountPence,
+        ),
+      )
+      .toSet();
+
+  final detector = ref.watch(recurringDetectionServiceProvider);
+  return detector
+      .detect(transactions: transactions)
+      .where(
+        (d) =>
+            !confirmedKeys.contains(d.detectionKey) &&
+            !dismissed.contains(d.detectionKey),
+      )
+      .toList()
+    ..sort((a, b) => b.monthlyTotalPence.compareTo(a.monthlyTotalPence));
+});
+
+class CategoryMonthPoint {
+  const CategoryMonthPoint({
+    required this.month,
+    required this.spentPence,
+  });
+
+  final DateTime month;
+  final int spentPence;
+}
+
+final categoryTrendProvider =
+    FutureProvider.family<List<CategoryMonthPoint>, String>((ref, categoryId) async {
+  final txRepo = await ref.watch(transactionRepositoryProvider.future);
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month - 5, 1);
+  final transactions = await txRepo.fetchForPeriod(start, now);
+
+  final points = <CategoryMonthPoint>[];
+  for (var i = 0; i < 6; i++) {
+    final month = DateTime(now.year, now.month - (5 - i), 1);
+    final spent = transactions
+        .where(
+          (t) =>
+              t.amountPence < 0 &&
+              !t.excludeFromAnalytics &&
+              isInMonth(t.transactionDate, month) &&
+              (categoryId == '_uncategorized'
+                  ? t.categoryId == null
+                  : t.categoryId == categoryId),
+        )
+        .fold<int>(0, (sum, t) => sum + t.amountPence.abs());
+    points.add(CategoryMonthPoint(month: month, spentPence: spent));
+  }
+  return points;
 });
 
 final upcomingRecurringProvider =

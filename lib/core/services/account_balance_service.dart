@@ -3,10 +3,6 @@ import 'package:swoosh/models/transaction.dart';
 
 class AccountBalanceService {
   int computeBalance(Account account, List<Transaction> transactions) {
-    if (account.source == DataSource.openbanking) {
-      return account.balancePence;
-    }
-
     final anchorPence = account.balanceAnchorPence ?? account.balancePence;
     final anchorDate = account.balanceAnchorDate ?? account.createdAt;
     final anchorDay = DateTime(
@@ -23,7 +19,7 @@ class AccountBalanceService {
             transaction.transactionDate.month,
             transaction.transactionDate.day,
           );
-          return !txDay.isBefore(anchorDay);
+          return txDay.isAfter(anchorDay);
         })
         .fold<int>(0, (sum, transaction) => sum + transaction.amountPence);
 

@@ -23,6 +23,8 @@ class Budget extends Equatable {
 
   double get progress => amountPence == 0 ? 0 : (spentPence / amountPence).clamp(0, 2);
   bool get isOverBudget => spentPence > amountPence;
+  int get remainingPence =>
+      (amountPence - spentPence).clamp(0, amountPence);
 
   factory Budget.fromJson(Map<String, dynamic> json) {
     return Budget(

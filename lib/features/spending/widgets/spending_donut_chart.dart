@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:swoosh/core/theme/chart_theme.dart';
 import 'package:swoosh/providers/data_providers.dart';
 
 class SpendingDonutChart extends StatelessWidget {
@@ -40,12 +41,9 @@ class SpendingDonutChart extends StatelessWidget {
     return SizedBox(
       height: 160,
       child: PieChart(
-        PieChartData(
-          sectionsSpace: 2,
-          centerSpaceRadius: 42,
-          sections: sections,
-        ),
-        duration: const Duration(milliseconds: 600),
+        ChartTheme.donut(sections: sections),
+        duration: ChartTheme.animationDuration,
+        curve: ChartTheme.curve,
       ),
     );
   }

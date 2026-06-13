@@ -1,28 +1,41 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/haptics.dart';
 import 'package:swoosh/providers/data_providers.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  var _didWarmProviders = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _warmShellProviders());
+  }
+
   void _onDestinationSelected(int index) {
-    HapticFeedback.selectionClick();
-    navigationShell.goBranch(
+    AppHaptics.selection();
+    widget.navigationShell.goBranch(
       index,
-      initialLocation: index == navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell.currentIndex,
     );
   }
 
   bool _canPopApp(BuildContext context) {
     final router = GoRouter.of(context);
-    return navigationShell.currentIndex == 0 && !router.canPop();
+    return widget.navigationShell.currentIndex == 0 && !router.canPop();
   }
 
   void _handlePop(BuildContext context) {
@@ -31,15 +44,13 @@ class AppShell extends ConsumerWidget {
       router.pop();
       return;
     }
-    if (navigationShell.currentIndex != 0) {
-      navigationShell.goBranch(0);
+    if (widget.navigationShell.currentIndex != 0) {
+      widget.navigationShell.goBranch(0);
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    _warmShellProviders(ref);
-
+  Widget build(BuildContext context) {
     return PopScope(
       canPop: _canPopApp(context),
       onPopInvokedWithResult: (didPop, result) {
@@ -48,9 +59,9 @@ class AppShell extends ConsumerWidget {
       child: ScaffoldMessenger(
         child: Scaffold(
           extendBody: true,
-          body: navigationShell,
+          body: widget.navigationShell,
           bottomNavigationBar: _FrostedNavigationBar(
-            selectedIndex: navigationShell.currentIndex,
+            selectedIndex: widget.navigationShell.currentIndex,
             onDestinationSelected: _onDestinationSelected,
           ),
         ),
@@ -58,17 +69,11 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  void _warmShellProviders(WidgetRef ref) {
-    ref.watch(accountsProvider);
-    ref.watch(transactionsProvider);
-    ref.watch(recurringProvider);
-    ref.watch(goalsProvider);
-    ref.watch(categoriesProvider);
-    ref.watch(monthlySummaryProvider);
-    ref.watch(safeToSpendProvider);
-    ref.watch(upcomingRecurringProvider);
-    final now = DateTime.now();
-    ref.watch(spendingMonthProvider(DateTime(now.year, now.month, 1)));
+  void _warmShellProviders() {
+    if (_didWarmProviders) return;
+    _didWarmProviders = true;
+    ref.read(accountsProvider);
+    ref.read(categoriesProvider);
   }
 }
 
@@ -170,9 +175,9 @@ class _FrostedNavigationBar extends StatelessWidget {
                 label: 'Spending',
               ),
               NavigationDestination(
-                icon: Icon(Icons.trending_up_outlined),
-                selectedIcon: Icon(Icons.trending_up),
-                label: 'Planning',
+                icon: Icon(Icons.insights_outlined),
+                selectedIcon: Icon(Icons.insights),
+                label: 'Insights',
               ),
             ],
           ),

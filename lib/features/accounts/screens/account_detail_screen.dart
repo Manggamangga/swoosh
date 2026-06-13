@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:swoosh/core/services/connection_account_service.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/theme/spacing.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
@@ -10,8 +10,8 @@ import 'package:swoosh/core/widgets/error_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
 import 'package:swoosh/core/widgets/transaction_tile.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
+import 'package:swoosh/features/accounts/widgets/import_statement_sheet.dart';
 import 'package:swoosh/models/account.dart';
-import 'package:swoosh/models/bank_connection.dart';
 import 'package:swoosh/models/transaction.dart';
 import 'package:swoosh/providers/data_providers.dart';
 import 'package:swoosh/providers/providers.dart';
@@ -63,58 +63,51 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     ref.invalidate(accountsProvider);
   }
 
-  Future<({BankConnection connection, bool deleteSynced})?>
-      _collectDisconnectDecision(BankConnection connection) async {
-    final label = ConnectionAccountService.connectionLabel(connection);
-    final choice = await showDialog<bool>(
+  Future<void> _setCurrentBalance(Account account) async {
+    final controller = TextEditingController(
+      text: (account.balancePence.abs() / 100).toStringAsFixed(2),
+    );
+    final isCredit = account.accountType == AccountType.credit;
+
+    final balanceText = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Also disconnect $label?'),
-        content: Text(
-          'This was the last account synced from $label. '
-          'Disconnecting removes the bank link so it no longer shows as active.',
+        title: Text(isCredit ? 'Set amount owed' : 'Set current balance'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: isCredit ? 'Amount owed' : 'Current balance',
+            prefixText: '£',
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Not now'),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Disconnect'),
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Save'),
           ),
         ],
       ),
     );
 
-    if (choice != true || !mounted) return null;
+    if (balanceText == null || balanceText.isEmpty) return;
 
-    final deleteSynced = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Keep synced data?'),
-        content: const Text(
-          'Choose whether to keep any remaining synced accounts as static history, '
-          'or delete them along with the connection.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep accounts'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Delete synced accounts',
-              style: TextStyle(color: AppColors.error.withValues(alpha: 0.9)),
-            ),
-          ),
-        ],
-      ),
-    );
+    final pence = Money.parseToPence(balanceText);
+    final resolved = isCredit ? -pence.abs() : pence;
+    final today = DateTime.now().toIso8601String().split('T').first;
 
-    if (deleteSynced == null || !mounted) return null;
-    return (connection: connection, deleteSynced: deleteSynced);
+    final repo = await ref.read(accountRepositoryProvider.future);
+    await repo.update(widget.accountId, {
+      'balance_pence': resolved,
+      'balance_anchor_pence': resolved,
+      'balance_anchor_date': today,
+    });
+    ref.invalidate(accountsProvider);
   }
 
   Future<void> _deleteAccount(Account account) async {
@@ -143,45 +136,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    BankConnection? connectionToDisconnect;
-    bool? deleteSyncedAccounts;
-    if (account.source == DataSource.openbanking) {
-      final connections = await ref.read(bankConnectionsProvider.future);
-      final accounts = await ref.read(accountsProvider.future);
-      final connection = ConnectionAccountService.connectionForAccount(
-        account,
-        connections,
-      );
-      if (connection != null) {
-        final linked = ConnectionAccountService.accountsForConnection(
-          connection,
-          accounts,
-        );
-        if (linked.length == 1 && linked.first.id == account.id) {
-          final decision = await _collectDisconnectDecision(connection);
-          if (!mounted) return;
-          if (decision != null) {
-            connectionToDisconnect = decision.connection;
-            deleteSyncedAccounts = decision.deleteSynced;
-          }
-        }
-      }
-    }
-
     final repo = await ref.read(accountRepositoryProvider.future);
     await repo.delete(widget.accountId);
     ref.invalidate(accountsProvider);
     ref.invalidate(transactionsProvider);
     ref.invalidate(allTransactionsProvider);
-
-    if (connectionToDisconnect != null && deleteSyncedAccounts != null) {
-      final bankRepo = ref.read(bankConnectionRepositoryProvider);
-      await bankRepo.disconnect(
-        connectionId: connectionToDisconnect.id,
-        deleteSyncedAccounts: deleteSyncedAccounts,
-      );
-      ref.invalidate(bankConnectionsProvider);
-    }
 
     if (mounted) context.go('/accounts');
   }
@@ -207,22 +166,30 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.upload_file),
-            onPressed: () => context.push('/accounts/${widget.accountId}/import'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.push('/accounts/${widget.accountId}/add-tx'),
+            tooltip: 'Import statement',
+            onPressed: () => showImportStatementSheet(
+              context,
+              ref,
+              accountId: widget.accountId,
+            ),
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
               final account = accountsAsync.valueOrNull
                   ?.where((item) => item.id == widget.accountId)
                   .firstOrNull;
-              if (account != null && value == 'delete') {
+              if (account == null) return;
+              if (value == 'delete') {
                 _deleteAccount(account);
+              } else if (value == 'balance') {
+                _setCurrentBalance(account);
               }
             },
             itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'balance',
+                child: Text('Set current balance'),
+              ),
               const PopupMenuItem(
                 value: 'delete',
                 child: Text(
@@ -237,7 +204,11 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
       body: accountsAsync.when(
         loading: () => ListView(
           padding: ViewInsets.listPadding(context),
-          children: const [SkeletonCard()],
+          children: const [
+            SkeletonCard(),
+            SizedBox(height: AppSpacing.sectionGap),
+            SkeletonTransactionList(itemCount: 6),
+          ],
         ),
         error: (error, _) => ErrorState(message: error.toString()),
         data: (accounts) {
@@ -257,15 +228,20 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 padding: ViewInsets.listPadding(context),
                 children: [
                   _AccountHeader(account: account),
-                  const SizedBox(height: 20),
-                  const SkeletonCard(),
+                  const SizedBox(height: AppSpacing.sectionGap),
+                  Text(
+                    'Transactions',
+                    style: AppTextStyles.sectionTitle(context),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  const SkeletonTransactionList(itemCount: 6),
                 ],
               ),
               error: (error, _) => ListView(
                 padding: ViewInsets.listPadding(context),
                 children: [
                   _AccountHeader(account: account),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.sectionGap),
                   ErrorState(message: error.toString()),
                 ],
               ),
@@ -275,44 +251,65 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     padding: ViewInsets.listPadding(context),
                     children: [
                       _AccountHeader(account: account),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.sectionGap),
                       EmptyState(
                         icon: Icons.receipt_long_outlined,
                         title: 'No transactions',
-                        subtitle: 'Add manually or import a CSV statement',
-                        action: ElevatedButton(
-                          onPressed: () =>
-                              context.push('/accounts/${widget.accountId}/import'),
-                          child: const Text('Import CSV'),
+                        subtitle: 'Import a statement to add transactions',
+                        actionLabel: 'Import statement',
+                        onAction: () => showImportStatementSheet(
+                          context,
+                          ref,
+                          accountId: widget.accountId,
                         ),
                       ),
                     ],
                   );
                 }
 
-                return ListView.builder(
+                return ListView(
                   padding: ViewInsets.listPadding(context),
-                  itemCount: transactions.length + 2,
-                  itemBuilder: (context, index) {
-                    if (index == 0) return _AccountHeader(account: account);
-                    if (index == 1) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 12),
-                        child: Text(
+                  children: [
+                    _AccountHeader(account: account),
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
                           'Transactions',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                          style: AppTextStyles.sectionTitle(context),
                         ),
-                      );
-                    }
-
-                    final transaction = transactions[index - 2];
-                    return SwooshCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                      child: TransactionTile(transaction: transaction),
-                    );
-                  },
+                        TextButton(
+                          onPressed: () => context.push(
+                            '/transactions?account=${widget.accountId}',
+                          ),
+                          child: const Text('See all'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SwooshCard(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.cardPadding,
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < transactions.length; i++)
+                            InkWell(
+                              onTap: () => context.push(
+                                '/transactions?account=${widget.accountId}',
+                              ),
+                              child: TransactionTile(
+                                transaction: transactions[i],
+                                showExcludedBadge: true,
+                                showDivider: i < transactions.length - 1,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -334,14 +331,16 @@ class _AccountHeader extends StatelessWidget {
         return AppColors.everyday;
       case AccountType.savings:
         return AppColors.savings;
+      case AccountType.credit:
+        return AppColors.credit;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final icon = Container(
-      width: 44,
-      height: 44,
+      width: AppSpacing.iconSize,
+      height: AppSpacing.iconSize,
       decoration: BoxDecoration(
         color: _accent.withValues(alpha: 0.15),
         shape: BoxShape.circle,
@@ -350,13 +349,14 @@ class _AccountHeader extends StatelessWidget {
     );
 
     return SwooshCard(
+      variant: SwooshCardVariant.elevated,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Hero(tag: 'account-${account.id}', child: icon),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.iconGap),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,22 +370,20 @@ class _AccountHeader extends StatelessWidget {
                     if (account.institution != null)
                       Text(
                         account.institution!,
-                        style: const TextStyle(color: AppColors.textSecondary),
+                        style: AppTextStyles.tileSubtitle(context),
                       ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             Money.format(
               account.balancePence,
               currency: account.currency,
             ),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: AppTextStyles.headlineBalance(context),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:swoosh/core/config/env.dart';
 import 'package:swoosh/core/cache/local_cache.dart';
+import 'package:swoosh/core/services/analytics_service.dart';
 import 'package:swoosh/core/services/account_balance_service.dart';
 import 'package:swoosh/core/services/balance_history_service.dart';
 import 'package:swoosh/core/services/biometric_service.dart';
@@ -13,18 +14,16 @@ import 'package:swoosh/core/services/forecast_service.dart';
 import 'package:swoosh/core/services/price_change_service.dart';
 import 'package:swoosh/core/services/recurring_detection_service.dart';
 import 'package:swoosh/core/services/safe_to_spend_service.dart';
-import 'package:swoosh/data/csv_import_service.dart';
+import 'package:swoosh/data/import/import_service.dart';
+import 'package:swoosh/data/import/statement_detector.dart';
 import 'package:swoosh/data/repositories/account_repository.dart';
 import 'package:swoosh/data/repositories/balance_snapshot_repository.dart';
-import 'package:swoosh/data/repositories/bank_connection_repository.dart';
 import 'package:swoosh/data/repositories/budget_repository.dart';
 import 'package:swoosh/data/repositories/category_repository.dart';
 import 'package:swoosh/data/repositories/category_rule_repository.dart';
 import 'package:swoosh/data/repositories/goal_repository.dart';
 import 'package:swoosh/data/repositories/recurring_repository.dart';
 import 'package:swoosh/data/repositories/transaction_repository.dart';
-import 'package:swoosh/models/bank_connection.dart';
-
 final supabaseProvider = Provider<SupabaseClient>(
   (ref) => Supabase.instance.client,
 );
@@ -100,17 +99,23 @@ final goalRepositoryProvider = Provider<GoalRepository>(
   (ref) => GoalRepository(ref.watch(supabaseProvider)),
 );
 
-final bankConnectionRepositoryProvider = Provider<BankConnectionRepository>(
-  (ref) => BankConnectionRepository(ref.watch(supabaseProvider)),
-);
-
-final bankConnectionsProvider = FutureProvider<List<BankConnection>>((ref) async {
-  final repo = ref.watch(bankConnectionRepositoryProvider);
-  return repo.fetchAll();
+final importServiceProvider = FutureProvider<ImportService>((ref) async {
+  return ImportService(
+    detector: ref.watch(statementDetectorProvider),
+    accountRepository: await ref.watch(accountRepositoryProvider.future),
+    transactionRepository: await ref.watch(transactionRepositoryProvider.future),
+    categoryRepository: ref.watch(categoryRepositoryProvider),
+    categoryRuleRepository: ref.watch(categoryRuleRepositoryProvider),
+    categoryMatcher: ref.watch(categoryMatcherServiceProvider),
+  );
 });
 
-final csvImportServiceProvider = Provider<CsvImportService>(
-  (ref) => CsvImportService(),
+final statementDetectorProvider = Provider<StatementDetector>(
+  (ref) => StatementDetector(),
+);
+
+final analyticsServiceProvider = Provider<AnalyticsService>(
+  (ref) => AnalyticsService(),
 );
 
 final balanceHistoryServiceProvider = Provider<BalanceHistoryService>(

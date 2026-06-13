@@ -133,20 +133,30 @@ class TransactionRepository {
     return created;
   }
 
-  Future<int> importCsvRows({
+  Future<ImportCounts> importCsvRows({
     required String accountId,
     required List<Map<String, dynamic>> rows,
   }) async {
     var imported = 0;
+    var skipped = 0;
     for (final row in rows) {
       try {
         await _client.from('transactions').insert(row);
         imported++;
-      } catch (_) {}
+      } catch (_) {
+        skipped++;
+      }
     }
     if (imported > 0) {
       await _accountRepo.recomputeBalance(accountId);
     }
-    return imported;
+    return ImportCounts(imported: imported, skipped: skipped);
   }
+}
+
+class ImportCounts {
+  const ImportCounts({required this.imported, required this.skipped});
+
+  final int imported;
+  final int skipped;
 }

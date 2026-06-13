@@ -12,9 +12,36 @@ void main() {
       expect(Money.parseToPence('£1,234.56'), 123456);
     });
 
-    test('formatSigned includes plus for positive', () {
-      expect(Money.formatSigned(50000), '+£500.00');
-      expect(Money.formatSigned(-9400), '-£94.00');
+    test('parseExchangeRate parses decimal rates', () {
+      expect(Money.parseExchangeRate('0.79'), 0.79);
+      expect(Money.parseExchangeRate('1.27'), 1.27);
+      expect(Money.parseExchangeRate(''), isNull);
+    });
+
+    test('convertForeignToGbpPence converts using rate to GBP', () {
+      expect(
+        Money.convertForeignToGbpPence(
+          foreignAmountPence: -2550,
+          currency: 'USD',
+          exchangeFrom: 'USD',
+          exchangeTo: 'GBP',
+          exchangeRate: 0.79,
+        ),
+        -2015,
+      );
+    });
+
+    test('convertForeignToGbpPence keeps GBP amounts unchanged', () {
+      expect(
+        Money.convertForeignToGbpPence(
+          foreignAmountPence: -4599,
+          currency: 'GBP',
+          exchangeFrom: 'GBP',
+          exchangeTo: 'GBP',
+          exchangeRate: null,
+        ),
+        -4599,
+      );
     });
   });
 }

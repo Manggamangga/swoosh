@@ -47,16 +47,5 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
-		<key>CFBundleURLTypes</key>
-		<array>
-			<dict>
-				<key>CFBundleURLName</key>
-				<string>swoosh.bank-callback</string>
-				<key>CFBundleURLSchemes</key>
-				<array>
-					<string>swoosh</string>
-				</array>
-			</dict>
-		</array>
 	</dict>
 </plist>

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:swoosh/core/theme/app_colors.dart';
+import 'package:swoosh/core/utils/haptics.dart';
 import 'package:swoosh/core/utils/money.dart';
 import 'package:swoosh/core/utils/view_insets.dart';
 import 'package:swoosh/core/widgets/category_icon.dart';
 import 'package:swoosh/core/widgets/empty_state.dart';
 import 'package:swoosh/core/widgets/error_state.dart';
 import 'package:swoosh/core/widgets/skeleton_loader.dart';
+import 'package:swoosh/features/accounts/widgets/import_statement_sheet.dart';
 import 'package:swoosh/features/spending/widgets/spending_donut_chart.dart';
 import 'package:swoosh/core/widgets/swoosh_card.dart';
 import 'package:swoosh/features/spending/widgets/budget_sheet.dart';
@@ -37,7 +38,7 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
   }
 
   void _shiftMonth(int delta) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selection();
     setState(() {
       _selectedMonth = DateTime(
         _selectedMonth.year,
@@ -57,7 +58,28 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
       });
     });
 
+    final accountsAsync = ref.watch(accountsProvider);
+    final accounts = accountsAsync.valueOrNull;
+    if (accounts != null && accounts.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Spending')),
+        body: ListView(
+          padding: ViewInsets.listPadding(context),
+          children: [
+            EmptyState(
+              icon: Icons.pie_chart_outline,
+              title: 'No spending data yet',
+              subtitle: 'Import transactions to see where your money goes',
+              actionLabel: 'Add account',
+              onAction: () => showImportStatementSheet(context, ref),
+            ),
+          ],
+        ),
+      );
+    }
+
     final spendingAsync = ref.watch(spendingMonthProvider(_selectedMonth));
+    final emergencyFundAsync = ref.watch(emergencyFundProgressProvider);
     final displayData = spendingAsync.valueOrNull ?? _cachedData;
     final isInitialLoad = displayData == null && spendingAsync.isLoading;
     final isRefreshing = displayData != null && spendingAsync.isLoading;
@@ -71,6 +93,7 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
         onRefresh: () async {
           ref.invalidate(spendingMonthProvider(_selectedMonth));
           ref.invalidate(budgetsForMonthProvider(_selectedMonth));
+          ref.invalidate(emergencyFundProgressProvider);
         },
         child: isInitialLoad
             ? ListView(
@@ -98,6 +121,7 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
                       opacity: isRefreshing ? 0.55 : 1,
                       child: _SpendingContent(
                         data: displayData!,
+                        emergencyFundAsync: emergencyFundAsync,
                         monthLabel: monthLabel,
                         isCurrentMonth: isCurrentMonth,
                         selectedMonth: _selectedMonth,
@@ -132,6 +156,7 @@ class _SpendingScreenState extends ConsumerState<SpendingScreen> {
 class _SpendingContent extends StatelessWidget {
   const _SpendingContent({
     required this.data,
+    required this.emergencyFundAsync,
     required this.monthLabel,
     required this.isCurrentMonth,
     required this.selectedMonth,
@@ -144,6 +169,7 @@ class _SpendingContent extends StatelessWidget {
   });
 
   final SpendingMonthData data;
+  final AsyncValue<EmergencyFundProgress?> emergencyFundAsync;
   final String monthLabel;
   final bool isCurrentMonth;
   final DateTime selectedMonth;
@@ -171,6 +197,18 @@ class _SpendingContent extends StatelessWidget {
             icon: Icons.pie_chart_outline,
             title: 'No spending this month',
             subtitle: 'Transactions on everyday accounts will appear here',
+          ),
+          emergencyFundAsync.when(
+            skipLoadingOnReload: true,
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (progress) {
+              if (progress == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: _EmergencyFundCard(progress: progress),
+              );
+            },
           ),
         ],
       );
@@ -241,6 +279,18 @@ class _SpendingContent extends StatelessWidget {
               onSetBudget: () => onSetBudget(row),
             ),
           ),
+        ),
+        emergencyFundAsync.when(
+          skipLoadingOnReload: true,
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (progress) {
+            if (progress == null) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: _EmergencyFundCard(progress: progress),
+            );
+          },
         ),
       ],
     );
@@ -343,7 +393,7 @@ class _ToggleChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        HapticFeedback.selectionClick();
+        AppHaptics.selection();
         onTap();
       },
       child: AnimatedContainer(
@@ -490,7 +540,7 @@ class _CategorySpendingRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '${Money.format(budget.spentPence)} / ${Money.format(budget.amountPence)}',
+                  '${(progress * 100).round()}% used',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -498,6 +548,14 @@ class _CategorySpendingRow extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '${Money.format(budget.remainingPence)} remaining of ${Money.format(budget.amountPence)}',
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textMuted,
+              ),
             ),
           ],
         ],
@@ -514,5 +572,75 @@ class _CategorySpendingRow extends StatelessWidget {
   Color _changeColor(int changePence) {
     if (changePence == 0) return AppColors.textMuted;
     return changePence > 0 ? AppColors.spending : AppColors.income;
+  }
+}
+
+class _EmergencyFundCard extends StatelessWidget {
+  const _EmergencyFundCard({required this.progress});
+
+  final EmergencyFundProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final percentUsed = (progress.progress * 100).round();
+
+    return SwooshCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.savings.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  color: AppColors.savings,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Emergency fund',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              Text(
+                '$percentUsed%',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.savings,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progress.progress,
+              minHeight: 6,
+              backgroundColor: AppColors.surfaceElevated,
+              color: AppColors.savings,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${Money.format(progress.currentPence)} saved · ${Money.format(progress.remainingPence)} to go',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

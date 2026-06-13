@@ -41,18 +41,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           SwooshCard(
-            onTap: () => context.push('/connect-bank'),
-            child: const Row(
-              children: [
-                Icon(Icons.account_balance, color: AppColors.primary),
-                SizedBox(width: 14),
-                Expanded(child: Text('Manage bank connections')),
-                Icon(Icons.chevron_right, color: AppColors.textMuted),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          SwooshCard(
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Biometric unlock'),

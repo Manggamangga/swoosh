@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum AccountType { everyday, savings }
+enum AccountType { everyday, savings, credit }
 
 enum DataSource { manual, csv, openbanking }
 
