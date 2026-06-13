@@ -1,23 +1,23 @@
 # Swoosh Privacy Policy
 
-**Last updated:** 10 June 2026
+**Last updated:** 13 June 2026
 
 Swoosh is a personal finance app for tracking accounts, transactions, budgets, and planning. This policy describes how data is handled when you use the app.
 
 ## Who operates Swoosh
 
-Swoosh is operated for personal, non-commercial use. For data protection enquiries, contact the operator at the email address provided during Enable Banking application registration.
+Swoosh is operated for personal, non-commercial use. For data protection enquiries, contact the operator at seandarianloh@gmail.com.
 
 ## What data we collect
 
 When you use Swoosh, the app may store and process:
 
-- Account details you add manually or sync via Open Banking (account names, balances, institutions)
+- Account details you create via statement import (account names, balances, institutions)
 - Transactions (dates, amounts, descriptions, categories)
 - Budgets, recurring payments, and savings goals
 - Authentication credentials managed through Supabase Auth (email and password if you sign up)
 
-If you connect a bank via Open Banking, account and transaction data is retrieved through Enable Banking only after you authorise access at your bank. Swoosh does not receive or store your bank login credentials.
+Statement files you choose to import are parsed on your device. Swoosh does not receive or store your bank login credentials.
 
 ## Where data is stored
 
@@ -33,14 +33,13 @@ Data is used solely to provide personal finance features inside the app: balance
 
 Swoosh uses:
 
-- **Supabase** — authentication, database, and server-side Edge Functions
-- **Enable Banking** — Open Banking account information services (AIS), when you choose to connect a bank
+- **Supabase** — authentication and database
 
-These providers process data only as needed to deliver the features you use. Enable Banking API credentials are stored in Supabase Edge Function secrets and are never embedded in the mobile app.
+These providers process data only as needed to deliver the features you use.
 
 ## Data retention and deletion
 
-Data remains in your account until you delete it or close your account. You can remove manual accounts and transactions within the app. To request deletion of all stored data, contact the operator using the email above.
+Data remains in your account until you delete it or close your account. You can remove accounts and transactions within the app. To request deletion of all stored data, contact the operator using the email above.
 
 ## Your rights
 

@@ -1,16 +1,16 @@
 # Graph Report - swoosh  (2026-06-13)
 
 ## Corpus Check
-- 151 files · ~317,768 words
+- 152 files · ~317,652 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1445 nodes · 1294 edges · 152 communities (127 shown, 25 thin omitted)
+- 1447 nodes · 1295 edges · 153 communities (128 shown, 25 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ee6d9f0d`
+- Built from commit: `92cecbf1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -164,7 +164,7 @@
 - [[_COMMUNITY_Community 151|Community 151]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Swoosh Terms of Service` - 11 edges
+1. `Swoosh Terms of Service` - 12 edges
 2. `Swoosh Privacy Policy` - 9 edges
 3. `Swoosh` - 7 edges
 4. `Language` - 6 edges
@@ -178,7 +178,7 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (152 total, 25 thin omitted)
+## Communities (153 total, 25 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -465,8 +465,8 @@ Cohesion: 0.17
 Nodes (11): build, SafeToSpendCard, SizedBox, SwooshCard, Text, package:flutter/material.dart, package:intl/intl.dart, package:swoosh/core/services/safe_to_spend_service.dart (+3 more)
 
 ### Community 93 - "Community 93"
-Cohesion: 0.17
-Nodes (11): Availability and changes, Changes, Contact, Governing law, Intellectual property, Limitation of liability, Open Banking, Swoosh Terms of Service (+3 more)
+Cohesion: 0.15
+Nodes (12): Availability and changes, Changes, Contact, Financial data, Governing law, Intellectual property, Limitation of liability, Open Banking (+4 more)
 
 ### Community 94 - "Community 94"
 Cohesion: 0.18
@@ -669,7 +669,7 @@ Cohesion: 0.50
 Nodes (3): main, package:flutter_test/flutter_test.dart, package:swoosh/core/services/transfer_noise_classifier.dart
 
 ## Knowledge Gaps
-- **1264 isolated node(s):** `MainActivity`, `flutter_export_environment.sh script`, `-registerWithRegistry`, `images`, `version` (+1259 more)
+- **1265 isolated node(s):** `MainActivity`, `flutter_export_environment.sh script`, `-registerWithRegistry`, `images`, `version` (+1260 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **25 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -679,7 +679,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `package:swoosh/core/widgets/period_pills.dart` connect `Community 42` to `Community 22`?**
   _High betweenness centrality (0.000) - this node is a cross-community bridge._
 - **What connects `MainActivity`, `flutter_export_environment.sh script`, `Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages.` to the rest of the system?**
-  _1265 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1266 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
 - **Should `Community 22` be split into smaller, more focused modules?**

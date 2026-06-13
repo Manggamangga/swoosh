@@ -26,6 +26,7 @@ Swoosh removed bank API integrations (Monzo, Enable Banking) in favour of CSV/PD
 - Wise CSV and Wise PDF dedupe across formats via shared numeric transaction IDs.
 - Foreign card spend from Wise CSV appears on the account but not in GBP spending totals unless imported via PDF.
 - Users must export full statements; live/pending PDF views are rejected with guidance.
+- Legacy bank-integration Edge Functions (Monzo, Enable Banking, GoCardless) are removed from the repo and should be deleted from the Supabase project.
 
 ## Alternatives considered
 

@@ -1,12 +1,12 @@
 # Swoosh Terms of Service
 
-**Last updated:** 10 June 2026
+**Last updated:** 13 June 2026
 
 These terms apply to your use of Swoosh, a personal finance tracking application.
 
 ## The service
 
-Swoosh helps you track accounts, transactions, budgets, recurring payments, and financial planning. Features may include manual entry, CSV import, and optional Open Banking connections via Enable Banking.
+Swoosh helps you track accounts, transactions, budgets, recurring payments, and financial planning. Features include statement import (CSV/PDF) for supported banks.
 
 Swoosh is provided for **personal, non-commercial use** unless otherwise agreed in writing.
 
@@ -16,16 +16,14 @@ You agree to:
 
 - Use the app only for your own personal finances (or finances you are authorised to manage)
 - Keep your login credentials secure
-- Provide accurate information when adding accounts or transactions
-- Comply with your bank’s terms when connecting accounts via Open Banking
+- Provide accurate information when importing statements or editing account details
+- Comply with your bank’s terms when exporting statements for import
 
 You must not misuse the app, attempt to access other users’ data, or interfere with the service or its infrastructure.
 
-## Open Banking
+## Financial data
 
-When you connect a bank, you authorise Swoosh (via Enable Banking) to access account information you select. Access is subject to PSD2 consent limits (typically up to 90 days before re-authorisation is required). You can revoke access through your bank or by disconnecting within the app where supported.
-
-Swoosh is not a bank, payment institution, or financial adviser. Balances and transaction data are supplied by your bank or entered by you; Swoosh does not guarantee their accuracy.
+Statement files you import are parsed to create accounts and transactions. Swoosh is not a bank, payment institution, or financial adviser. Balances and transaction data come from your imported statements or manual edits; Swoosh does not guarantee their accuracy.
 
 ## Availability and changes
 
@@ -49,7 +47,7 @@ These terms are governed by the laws of England and Wales, without regard to con
 
 ## Contact
 
-For questions about these terms, contact the operator at the email address provided during Enable Banking application registration.
+For questions about these terms, contact seandarianloh@gmail.com.
 
 ## Changes
 

@@ -95,13 +95,13 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\pubspec.yaml": {
-    "mtime": 1781368675.2333238,
-    "ast_hash": "f6365528eb3c5f777cb3459844cdba76",
+    "mtime": 1781372961.7357118,
+    "ast_hash": "2e5b9a48d1d6d9ab32a57f9056ac5089",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\README.md": {
-    "mtime": 1781130710.771303,
-    "ast_hash": "f792ecf6172cf73dd0798f8edb2db616",
+    "mtime": 1781389589.712482,
+    "ast_hash": "b419bf765f66db0605f2e43e3294538b",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0001-flutter-over-react-native.md": {
@@ -845,13 +845,13 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\PRIVACY.md": {
-    "mtime": 1781128778.794902,
-    "ast_hash": "19f6effd86dc096f6f7346b864dad710",
+    "mtime": 1781389593.3599663,
+    "ast_hash": "a1e6024525623a48bf0242b4427aa0e1",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\TERMS.md": {
-    "mtime": 1781128781.3070235,
-    "ast_hash": "4668a457f6971f34f78eab12e5fbe9c7",
+    "mtime": 1781389599.0326178,
+    "ast_hash": "8ebb834219a937b51f91b6a681f8e187",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0004-enable-banking-replacement.md": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\docs\\adr\\0009-statement-only-imports.md": {
-    "mtime": 1781372243.7737663,
-    "ast_hash": "d877ec58e837031ad6ec81761297507d",
+    "mtime": 1781389599.4031627,
+    "ast_hash": "9f34e75b6a456005de6d2f5b075ce6cb",
     "semantic_hash": ""
   },
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\test\\fixtures\\barclays_statement.txt": {
@@ -1037,6 +1037,11 @@
   "C:\\Sean\\Personal Projects\\Coding\\swoosh\\ios\\Runner\\Assets.xcassets\\LaunchBackground.imageset\\background.png": {
     "mtime": 1781044621.2119842,
     "ast_hash": "71c063051d2c43d4ab2b99c0fabf7e01",
+    "semantic_hash": ""
+  },
+  "C:\\Sean\\Personal Projects\\Coding\\swoosh\\scripts\\remove-bank-edge-functions.ps1": {
+    "mtime": 1781389588.743822,
+    "ast_hash": "2186888855fc24529ea12cb05e524ba4",
     "semantic_hash": ""
   }
 }

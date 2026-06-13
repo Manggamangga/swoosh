@@ -9642,6 +9642,15 @@
       "norm_label": "package:swoosh/data/repositories/transaction_repository.dart"
     },
     {
+      "label": "remove-bank-edge-functions.ps1",
+      "file_type": "code",
+      "source_file": "scripts/remove-bank-edge-functions.ps1",
+      "source_location": "L1",
+      "id": "scripts_remove_bank_edge_functions_ps1",
+      "community": 152,
+      "norm_label": "remove-bank-edge-functions.ps1"
+    },
+    {
       "label": "dedupe_test.dart",
       "file_type": "code",
       "source_file": "test/dedupe_test.dart",
@@ -10707,7 +10716,7 @@
       "label": "Data retention and deletion",
       "file_type": "document",
       "source_file": "PRIVACY.md",
-      "source_location": "L41",
+      "source_location": "L40",
       "id": "swoosh_privacy_data_retention_and_deletion",
       "community": 103,
       "norm_label": "data retention and deletion"
@@ -10716,7 +10725,7 @@
       "label": "Your rights",
       "file_type": "document",
       "source_file": "PRIVACY.md",
-      "source_location": "L45",
+      "source_location": "L44",
       "id": "swoosh_privacy_your_rights",
       "community": 103,
       "norm_label": "your rights"
@@ -10725,7 +10734,7 @@
       "label": "Changes",
       "file_type": "document",
       "source_file": "PRIVACY.md",
-      "source_location": "L49",
+      "source_location": "L48",
       "id": "swoosh_privacy_changes",
       "community": 103,
       "norm_label": "changes"
@@ -10776,37 +10785,10 @@
       "norm_label": "supabase"
     },
     {
-      "label": "Monzo (recommended \u2014 automatic sync)",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L26",
-      "id": "swoosh_readme_monzo_recommended_automatic_sync",
-      "community": 10,
-      "norm_label": "monzo (recommended \u2014 automatic sync)"
-    },
-    {
-      "label": "Other banks (CSV / manual)",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L36",
-      "id": "swoosh_readme_other_banks_csv_manual",
-      "community": 10,
-      "norm_label": "other banks (csv / manual)"
-    },
-    {
-      "label": "Enable Banking (optional \u2014 limited UK coverage)",
-      "file_type": "document",
-      "source_file": "README.md",
-      "source_location": "L40",
-      "id": "swoosh_readme_enable_banking_optional_limited_uk_coverage",
-      "community": 10,
-      "norm_label": "enable banking (optional \u2014 limited uk coverage)"
-    },
-    {
       "label": "Features",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L44",
+      "source_location": "L28",
       "id": "swoosh_readme_features",
       "community": 10,
       "norm_label": "features"
@@ -10815,7 +10797,7 @@
       "label": "Git commits",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L52",
+      "source_location": "L35",
       "id": "swoosh_readme_git_commits",
       "community": 10,
       "norm_label": "git commits"
@@ -10857,19 +10839,19 @@
       "norm_label": "your responsibilities"
     },
     {
-      "label": "Open Banking",
+      "label": "Financial data",
       "file_type": "document",
       "source_file": "TERMS.md",
       "source_location": "L24",
-      "id": "swoosh_terms_open_banking",
+      "id": "swoosh_terms_financial_data",
       "community": 93,
-      "norm_label": "open banking"
+      "norm_label": "financial data"
     },
     {
       "label": "Availability and changes",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L30",
+      "source_location": "L28",
       "id": "swoosh_terms_availability_and_changes",
       "community": 93,
       "norm_label": "availability and changes"
@@ -10878,7 +10860,7 @@
       "label": "Limitation of liability",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L34",
+      "source_location": "L32",
       "id": "swoosh_terms_limitation_of_liability",
       "community": 93,
       "norm_label": "limitation of liability"
@@ -10887,7 +10869,7 @@
       "label": "Intellectual property",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L38",
+      "source_location": "L36",
       "id": "swoosh_terms_intellectual_property",
       "community": 93,
       "norm_label": "intellectual property"
@@ -10896,7 +10878,7 @@
       "label": "Termination",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L42",
+      "source_location": "L40",
       "id": "swoosh_terms_termination",
       "community": 93,
       "norm_label": "termination"
@@ -10905,7 +10887,7 @@
       "label": "Governing law",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L46",
+      "source_location": "L44",
       "id": "swoosh_terms_governing_law",
       "community": 93,
       "norm_label": "governing law"
@@ -10914,7 +10896,7 @@
       "label": "Contact",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L50",
+      "source_location": "L48",
       "id": "swoosh_terms_contact",
       "community": 93,
       "norm_label": "contact"
@@ -10923,7 +10905,7 @@
       "label": "Changes",
       "file_type": "document",
       "source_file": "TERMS.md",
-      "source_location": "L54",
+      "source_location": "L52",
       "id": "swoosh_terms_changes",
       "community": 93,
       "norm_label": "changes"
@@ -11166,7 +11148,7 @@
       "label": "Alternatives considered",
       "file_type": "document",
       "source_file": "docs/adr/0009-statement-only-imports.md",
-      "source_location": "L30",
+      "source_location": "L31",
       "id": "adr_0009_statement_only_imports_alternatives_considered",
       "community": 114,
       "norm_label": "alternatives considered"
@@ -11188,6 +11170,42 @@
       "id": "launchimage_imageset_readme_launch_screen_assets",
       "community": 16,
       "norm_label": "launch screen assets"
+    },
+    {
+      "label": "Monzo (recommended \u2014 automatic sync)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L26",
+      "community": 10,
+      "norm_label": "monzo (recommended \u2014 automatic sync)",
+      "id": "swoosh_readme_monzo_recommended_automatic_sync"
+    },
+    {
+      "label": "Other banks (CSV / manual)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L36",
+      "community": 10,
+      "norm_label": "other banks (csv / manual)",
+      "id": "swoosh_readme_other_banks_csv_manual"
+    },
+    {
+      "label": "Enable Banking (optional \u2014 limited UK coverage)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L40",
+      "community": 10,
+      "norm_label": "enable banking (optional \u2014 limited uk coverage)",
+      "id": "swoosh_readme_enable_banking_optional_limited_uk_coverage"
+    },
+    {
+      "label": "Open Banking",
+      "file_type": "document",
+      "source_file": "TERMS.md",
+      "source_location": "L24",
+      "community": 93,
+      "norm_label": "open banking",
+      "id": "swoosh_terms_open_banking"
     },
     {
       "label": "package:swoosh/core/config/env.dart",
@@ -13184,9 +13202,9 @@
       "source_file": "ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ios_runner_assets_xcassets_launchbackground_imageset_contents_json",
-      "target": "launchbackground_imageset_contents_images",
-      "confidence_score": 1.0
+      "target": "launchbackground_imageset_contents_images"
     },
     {
       "relation": "contains",
@@ -13194,9 +13212,9 @@
       "source_file": "ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ios_runner_assets_xcassets_launchbackground_imageset_contents_json",
-      "target": "launchbackground_imageset_contents_info",
-      "confidence_score": 1.0
+      "target": "launchbackground_imageset_contents_info"
     },
     {
       "relation": "contains",
@@ -13204,9 +13222,9 @@
       "source_file": "ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "launchbackground_imageset_contents_info",
-      "target": "launchbackground_imageset_contents_info_author",
-      "confidence_score": 1.0
+      "target": "launchbackground_imageset_contents_info_author"
     },
     {
       "relation": "contains",
@@ -13214,9 +13232,9 @@
       "source_file": "ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "launchbackground_imageset_contents_info",
-      "target": "launchbackground_imageset_contents_info_version",
-      "confidence_score": 1.0
+      "target": "launchbackground_imageset_contents_info_version"
     },
     {
       "relation": "contains",
@@ -24024,9 +24042,9 @@
       "source_file": "CONTEXT.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_context_language",
-      "target": "swoosh_context_data_entry",
-      "confidence_score": 1.0
+      "target": "swoosh_context_data_entry"
     },
     {
       "relation": "contains",
@@ -24034,9 +24052,9 @@
       "source_file": "CONTEXT.md",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_context_language",
-      "target": "swoosh_context_budgeting_insights",
-      "confidence_score": 1.0
+      "target": "swoosh_context_budgeting_insights"
     },
     {
       "relation": "contains",
@@ -24064,9 +24082,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "privacy_md",
-      "target": "swoosh_privacy_swoosh_privacy_policy",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_swoosh_privacy_policy"
     },
     {
       "relation": "contains",
@@ -24074,9 +24092,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_who_operates_swoosh",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_who_operates_swoosh"
     },
     {
       "relation": "contains",
@@ -24084,9 +24102,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_what_data_we_collect",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_what_data_we_collect"
     },
     {
       "relation": "contains",
@@ -24094,9 +24112,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_where_data_is_stored",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_where_data_is_stored"
     },
     {
       "relation": "contains",
@@ -24104,9 +24122,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_how_data_is_used",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_how_data_is_used"
     },
     {
       "relation": "contains",
@@ -24114,9 +24132,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_third_party_services",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_third_party_services"
     },
     {
       "relation": "contains",
@@ -24124,9 +24142,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_data_retention_and_deletion",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_data_retention_and_deletion"
     },
     {
       "relation": "contains",
@@ -24134,9 +24152,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_your_rights",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_your_rights"
     },
     {
       "relation": "contains",
@@ -24144,9 +24162,9 @@
       "source_file": "PRIVACY.md",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_privacy_swoosh_privacy_policy",
-      "target": "swoosh_privacy_changes",
-      "confidence_score": 1.0
+      "target": "swoosh_privacy_changes"
     },
     {
       "relation": "contains",
@@ -24224,9 +24242,9 @@
       "source_file": "README.md",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_readme_supabase",
-      "target": "swoosh_readme_monzo_recommended_automatic_sync",
-      "confidence_score": 1.0
+      "target": "swoosh_readme_monzo_recommended_automatic_sync"
     },
     {
       "relation": "contains",
@@ -24234,9 +24252,9 @@
       "source_file": "README.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_readme_supabase",
-      "target": "swoosh_readme_other_banks_csv_manual",
-      "confidence_score": 1.0
+      "target": "swoosh_readme_other_banks_csv_manual"
     },
     {
       "relation": "contains",
@@ -24244,9 +24262,9 @@
       "source_file": "README.md",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_readme_supabase",
-      "target": "swoosh_readme_enable_banking_optional_limited_uk_coverage",
-      "confidence_score": 1.0
+      "target": "swoosh_readme_enable_banking_optional_limited_uk_coverage"
     },
     {
       "relation": "contains",
@@ -24254,9 +24272,9 @@
       "source_file": "TERMS.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "terms_md",
-      "target": "swoosh_terms_swoosh_terms_of_service",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_swoosh_terms_of_service"
     },
     {
       "relation": "contains",
@@ -24264,9 +24282,9 @@
       "source_file": "TERMS.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_the_service",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_the_service"
     },
     {
       "relation": "contains",
@@ -24274,9 +24292,9 @@
       "source_file": "TERMS.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_your_responsibilities",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_your_responsibilities"
     },
     {
       "relation": "contains",
@@ -24285,7 +24303,7 @@
       "source_location": "L24",
       "weight": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_open_banking",
+      "target": "swoosh_terms_financial_data",
       "confidence_score": 1.0
     },
     {
@@ -24294,9 +24312,9 @@
       "source_file": "TERMS.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_availability_and_changes",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_availability_and_changes"
     },
     {
       "relation": "contains",
@@ -24304,9 +24322,9 @@
       "source_file": "TERMS.md",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_limitation_of_liability",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_limitation_of_liability"
     },
     {
       "relation": "contains",
@@ -24314,9 +24332,9 @@
       "source_file": "TERMS.md",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_intellectual_property",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_intellectual_property"
     },
     {
       "relation": "contains",
@@ -24324,9 +24342,9 @@
       "source_file": "TERMS.md",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_termination",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_termination"
     },
     {
       "relation": "contains",
@@ -24334,9 +24352,9 @@
       "source_file": "TERMS.md",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_governing_law",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_governing_law"
     },
     {
       "relation": "contains",
@@ -24344,9 +24362,9 @@
       "source_file": "TERMS.md",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_contact",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_contact"
     },
     {
       "relation": "contains",
@@ -24354,9 +24372,19 @@
       "source_file": "TERMS.md",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "swoosh_terms_swoosh_terms_of_service",
-      "target": "swoosh_terms_changes",
-      "confidence_score": 1.0
+      "target": "swoosh_terms_changes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TERMS.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "swoosh_terms_swoosh_terms_of_service",
+      "target": "swoosh_terms_open_banking"
     },
     {
       "relation": "contains",
@@ -24394,9 +24422,9 @@
       "source_file": "docs/adr/0004-enable-banking-replacement.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0004_enable_banking_replacement_md",
-      "target": "adr_0004_enable_banking_replacement_enable_banking_replaces_gocardless_for_open_banking",
-      "confidence_score": 1.0
+      "target": "adr_0004_enable_banking_replacement_enable_banking_replaces_gocardless_for_open_banking"
     },
     {
       "relation": "contains",
@@ -24404,9 +24432,9 @@
       "source_file": "docs/adr/0005-monzo-direct-csv-first.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0005_monzo_direct_csv_first_md",
-      "target": "adr_0005_monzo_direct_csv_first_monzo_direct_api_with_csv_first_for_other_banks",
-      "confidence_score": 1.0
+      "target": "adr_0005_monzo_direct_csv_first_monzo_direct_api_with_csv_first_for_other_banks"
     },
     {
       "relation": "contains",
@@ -24414,9 +24442,9 @@
       "source_file": "docs/adr/0006-rules-based-categorization.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0006_rules_based_categorization_md",
-      "target": "adr_0006_rules_based_categorization_rules_based_categorization_over_llm",
-      "confidence_score": 1.0
+      "target": "adr_0006_rules_based_categorization_rules_based_categorization_over_llm"
     },
     {
       "relation": "contains",
@@ -24424,9 +24452,9 @@
       "source_file": "docs/adr/0007-retire-transfer-pairing.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0007_retire_transfer_pairing_md",
-      "target": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion",
-      "confidence_score": 1.0
+      "target": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion"
     },
     {
       "relation": "contains",
@@ -24434,9 +24462,9 @@
       "source_file": "docs/adr/0007-retire-transfer-pairing.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion",
-      "target": "adr_0007_retire_transfer_pairing_status",
-      "confidence_score": 1.0
+      "target": "adr_0007_retire_transfer_pairing_status"
     },
     {
       "relation": "contains",
@@ -24444,9 +24472,9 @@
       "source_file": "docs/adr/0007-retire-transfer-pairing.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion",
-      "target": "adr_0007_retire_transfer_pairing_context",
-      "confidence_score": 1.0
+      "target": "adr_0007_retire_transfer_pairing_context"
     },
     {
       "relation": "contains",
@@ -24454,9 +24482,9 @@
       "source_file": "docs/adr/0007-retire-transfer-pairing.md",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion",
-      "target": "adr_0007_retire_transfer_pairing_decision",
-      "confidence_score": 1.0
+      "target": "adr_0007_retire_transfer_pairing_decision"
     },
     {
       "relation": "contains",
@@ -24464,9 +24492,9 @@
       "source_file": "docs/adr/0007-retire-transfer-pairing.md",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0007_retire_transfer_pairing_adr_0007_retire_transfer_pairing_in_favour_of_per_transaction_exclusion",
-      "target": "adr_0007_retire_transfer_pairing_consequences",
-      "confidence_score": 1.0
+      "target": "adr_0007_retire_transfer_pairing_consequences"
     },
     {
       "relation": "contains",
@@ -24474,9 +24502,9 @@
       "source_file": "docs/adr/0008-enable-banking-restricted-production.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0008_enable_banking_restricted_production_md",
-      "target": "adr_0008_enable_banking_restricted_production_enable_banking_restricted_production_for_personal_use",
-      "confidence_score": 1.0
+      "target": "adr_0008_enable_banking_restricted_production_enable_banking_restricted_production_for_personal_use"
     },
     {
       "relation": "contains",
@@ -24484,9 +24512,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_adr_0009_statement_only_imports_md",
-      "target": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_adr_0009_statement_only_imports"
     },
     {
       "relation": "contains",
@@ -24494,9 +24522,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "target": "adr_0009_statement_only_imports_status",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_status"
     },
     {
       "relation": "contains",
@@ -24504,9 +24532,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "target": "adr_0009_statement_only_imports_context",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_context"
     },
     {
       "relation": "contains",
@@ -24514,9 +24542,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "target": "adr_0009_statement_only_imports_decision",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_decision"
     },
     {
       "relation": "contains",
@@ -24524,9 +24552,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "target": "adr_0009_statement_only_imports_consequences",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_consequences"
     },
     {
       "relation": "contains",
@@ -24534,9 +24562,9 @@
       "source_file": "docs/adr/0009-statement-only-imports.md",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "adr_0009_statement_only_imports_adr_0009_statement_only_imports",
-      "target": "adr_0009_statement_only_imports_alternatives_considered",
-      "confidence_score": 1.0
+      "target": "adr_0009_statement_only_imports_alternatives_considered"
     },
     {
       "relation": "contains",
@@ -25960,5 +25988,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ee6d9f0d1e93fe640feed49a88b6da223acb383f"
+  "built_at_commit": "92cecbf1007b088ea960bad76dbfccb1faf4f4c6"
 }
